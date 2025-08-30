@@ -1,22 +1,41 @@
-from flask import Flask
+from flask import Flask, render_template
 app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return "Hola mundo desde la ruta"
+    return render_template("index.html")
 
-@app.route("/acerca-de")
-def tasks():
-    return "<h1>Rutina.py</h1><p>Gestor de tareas para aprender programando con Python y Flask.</p>"
+@app.route("/tareas")
+def mostrar_tareas():
+    tareas = [
+        {
+            "nombre": "Hacer ejercicio",
+            "estado": "pendiente",
+            "prioridad": "alta",
+            "fecha": "2025-08-24",
+            "completada": False
+        },
+        {
+            "nombre": "Leer",
+            "estado": "pendiente",
+            "prioridad": "media",
+            "fecha": "2025-08-25",
+            "completada": False
+        },
+        {
+            "nombre": "Escribir",
+            "estado": "pendiente",
+            "prioridad": "baja",
+            "fecha": "2025-08-26",
+            "completada": True
+        }
+    ]
+    return render_template("tareas.html", tareas=tareas)
 
-@app.route("/contacto")
-def contact():
-    return "Aquí se mostrará el formulario de contacto"
+@app.route('/acerca-de')
+def acerca_de():
+    return render_template("acerca-de.html")
 
-@app.route("/saludo")
-def saludo():
-    return "<h1>Hola mundo desde la ruta saludo</h1>"
-
-@app.route("/saludo/<nombre>")
-def saludo_nombre(nombre):
-    return f"<h1>Hola {nombre}</h1>"
+@app.route('/filtrar-tareas/<filtro>')
+def tareas_filtradas(filtro):
+    return render_template("tareas.html", tareas=tareas_filtradas)

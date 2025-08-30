@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %} | Rutina.py</title>
+  </head>
+  <body>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="/tareas">Tareas</a>
+      <a href="/acerca-de">Acerca de</a>
+    </nav>
+    <main>
+      {% block content %}
+        {% endblock %}
+    </main>
+  </body>
+</html>

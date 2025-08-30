@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}Tareas{% endblock %}
+{% block content %}
+<h1>Tareas</h1>
+<p>Estas son las tareas que tienes que hacer:</p>
+<ul>
+  {% for tarea in tareas %}
+    {% if tarea.completada == False %}
+  <li>
+    <h2>{{ tarea.nombre }}</h2>
+    <p>Estado: {{ tarea.estado }}</p>
+    <p>Prioridad: {{ tarea.prioridad }}</p>
+    <p>Fecha: {{ tarea.fecha }}</p>
+  </li>
+  {% endif %}
+    {% endfor %}
+</ul>
+{% endblock %}
