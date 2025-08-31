@@ -3,16 +3,10 @@
 {% block content %}
 <h1>Tareas</h1>
 <p>Estas son las tareas que tienes que hacer:</p>
+<a href="/nueva-tarea" class="btn btn-primary" title="Crear Nueva Tarea">Nueva Tarea</a>
 <ul>
   {% for tarea in tareas %}
-    {% if tarea.completada == False %}
-  <li>
-    <h2>{{ tarea.nombre }}</h2>
-    <p>Estado: {{ tarea.estado }}</p>
-    <p>Prioridad: {{ tarea.prioridad }}</p>
-    <p>Fecha: {{ tarea.fecha }}</p>
-  </li>
-  {% endif %}
-    {% endfor %}
+  <li>{{ tarea }}</li>
+  {% endfor %}
 </ul>
 {% endblock %}
