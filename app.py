@@ -1,9 +1,18 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect
 app = Flask(__name__)
 
 @app.route("/")
 def index():
     return render_template("index.html")
+
+@app.route("/nueva-tarea", methods=["GET", "POST"])
+def nueva_tarea():
+    if request.method == "POST":
+        nombre = request.form["title"]
+        # return redirect("/tareas")
+        return f"La tarea nueva es: {nombre}"
+    else:
+        return render_template("formulario.html")
 
 @app.route("/tareas")
 def mostrar_tareas():
@@ -15,20 +24,6 @@ def mostrar_tareas():
             "fecha": "2025-08-24",
             "completada": False
         },
-        {
-            "nombre": "Leer",
-            "estado": "pendiente",
-            "prioridad": "media",
-            "fecha": "2025-08-25",
-            "completada": False
-        },
-        {
-            "nombre": "Escribir",
-            "estado": "pendiente",
-            "prioridad": "baja",
-            "fecha": "2025-08-26",
-            "completada": True
-        }
     ]
     return render_template("tareas.html", tareas=tareas)
 
