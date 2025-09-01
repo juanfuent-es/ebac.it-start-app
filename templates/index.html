@@ -1,9 +1,59 @@
+<!-- =============================================================================
+     TEMPLATE: PÁGINA PRINCIPAL (INICIO)
+     =============================================================================
+     Esta es la página principal de la aplicación que se muestra cuando
+     el usuario visita la ruta raíz (/)
+     
+     NOTA: Este template es muy similar a tareas.html, pero se muestra
+     en la página de inicio. En una aplicación real, podrías querer
+     mostrar información diferente aquí.
+     
+     CONCEPTOS CLAVE:
+     - Página de inicio: Primera página que ven los usuarios
+     - Reutilización de código: Similar estructura a tareas.html
+     - Navegación: Enlaces para acceder a diferentes secciones
+     ============================================================================= -->
+<!-- Heredamos la estructura del template layout.html -->
 {% extends "layout.html" %}
-{% block title %}Inicio{% endblock %}
+<!-- Definimos el título de esta página -->
+{% block title %}Tareas{% endblock %}
+<!-- Definimos el contenido específico de esta página -->
 {% block content %}
-<article>
-  <h1>Rutina.py</h1>
-  <p>Rutina.py es una aplicación web que te ayuda a crear y gestionar tus rutinas de entrenamiento.</p>
-  <a href="/nueva-tarea" title="Crear Nueva Tarea">Nueva Tarea</a>
-</article>
+<div class="container mt-4">
+  <!-- Título de la página principal -->
+  <h1>Tareas</h1>
+  <!-- Descripción de la aplicación -->
+  <p>Estas son las tareas que tienes que hacer:</p>
+  <!-- Botón para crear nueva tarea -->
+  <!-- Este botón lleva al formulario de creación -->
+  <a href="/nueva-tarea" class="btn btn-primary mb-3" title="Crear Nueva Tarea">Nueva Tarea</a>
+  <!-- CONDICIONAL: Verificamos si hay tareas para mostrar -->
+  {% if tareas %}
+  <!-- Si hay tareas, las mostramos en una lista -->
+  <div class="list-group">
+    <!-- BUCLE: Iteramos sobre cada tarea en la lista -->
+    {% for tarea in tareas %}
+    <!-- Cada tarea se muestra en un elemento de la lista -->
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <!-- Nombre de la tarea -->
+      <span>{{ tarea }}</span>
+      <!-- Botones de acción para cada tarea -->
+      <div class="btn-group" role="group">
+        <!-- Botón para editar la tarea -->
+        <a href="/editar-tarea/{{ loop.index0 }}" class="btn btn-sm btn-outline-primary">Editar</a>
+        <!-- Botón para eliminar la tarea -->
+        <!-- onclick="..." = Confirma antes de eliminar -->
+        <a href="/eliminar-tarea/{{ loop.index0 }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que quieres eliminar esta tarea?')">Eliminar</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <!-- Si no hay tareas, mostramos un mensaje informativo -->
+  <!-- alert-info = Alerta azul de Bootstrap -->
+  <div class="alert alert-info">
+    No hay tareas pendientes. ¡Agrega una nueva tarea!
+  </div>
+  {% endif %}
+</div>
 {% endblock %}

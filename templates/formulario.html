@@ -1,11 +1,42 @@
+<!-- =============================================================================
+     TEMPLATE: FORMULARIO PARA CREAR NUEVA TAREA
+     =============================================================================
+     Esta página muestra un formulario para crear una nueva tarea
+     
+     CONCEPTOS CLAVE:
+     - Formulario HTML: Permite al usuario enviar datos al servidor
+     - method="post": Los datos se envían de forma segura (no visibles en la URL)
+     - action="/nueva-tarea": La URL donde se envían los datos del formulario
+     - name="title": Identifica el campo en el servidor (request.form["title"])
+     - Bootstrap: Clases CSS para estilizar el formulario
+     ============================================================================= -->
+<!-- Heredamos la estructura del template layout.html -->
 {% extends "layout.html" %}
+<!-- Definimos el título de esta página -->
 {% block title %}Nueva Tarea{% endblock %}
+<!-- Definimos el contenido específico de esta página -->
 {% block content %}
+<!-- Título de la página -->
 <h1>Nueva Tarea</h1>
+<!-- FORMULARIO HTML -->
+<!-- action="/nueva-tarea" = URL donde se envían los datos -->
+<!-- method="post" = Método HTTP para enviar datos de forma segura -->
 <form action="/nueva-tarea" method="post">
+  <!-- ETIQUETA DEL CAMPO -->
+  <!-- for="nombre" = Asocia la etiqueta con el campo de entrada -->
+  <!-- form-label = Clase de Bootstrap para estilizar etiquetas -->
   <label class="form-label" for="nombre">Título de la tarea</label>
+  <!-- CAMPO DE ENTRADA -->
+  <!-- name="title" = Nombre del campo (se usa en request.form["title"]) -->
+  <!-- class="form-control" = Estilo de Bootstrap para campos de entrada -->
+  <!-- type="text" = Tipo de entrada (texto) -->
+  <!-- id="nombre" = Identificador único del campo (se asocia con for="nombre") -->
   <input name="title" class="form-control" type="text" id="nombre">
+  <!-- Espaciado -->
   <br>
+  <!-- BOTÓN DE ENVÍO -->
+  <!-- type="submit" = Botón que envía el formulario -->
+  <!-- class="btn btn-primary" = Estilo de botón azul de Bootstrap -->
   <button type="submit" class="btn btn-primary">Guardar</button>
 </form>
 {% endblock %}

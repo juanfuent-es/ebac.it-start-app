@@ -1,0 +1,48 @@
+<!-- =============================================================================
+     TEMPLATE: FORMULARIO PARA EDITAR TAREA
+     =============================================================================
+     Esta página muestra un formulario para editar una tarea existente
+     
+     CONCEPTOS CLAVE:
+     - Formulario de edición: Similar al de crear, pero con datos pre-llenados
+     - value="{{ tarea }}": Pre-llena el campo con el valor actual de la tarea
+     - {{ indice }}: Variable que contiene la posición de la tarea en la lista
+     - required: Atributo HTML que hace el campo obligatorio
+     - d-flex gap-2: Flexbox con espacio entre elementos
+     ============================================================================= -->
+<!-- Heredamos la estructura del template layout.html -->
+{% extends "layout.html" %}
+<!-- Definimos el título de esta página -->
+{% block title %}Editar Tarea{% endblock %}
+<!-- Definimos el contenido específico de esta página -->
+{% block content %}
+<div class="container mt-4">
+  <!-- Título de la página -->
+  <h1>Editar Tarea</h1>
+  <!-- FORMULARIO DE EDICIÓN -->
+  <!-- action="/editar-tarea/{{ indice }}" = URL con el índice de la tarea a editar -->
+  <!-- method="post" = Método HTTP para enviar los cambios -->
+  <form action="/editar-tarea/{{ indice }}" method="post">
+    <!-- GRUPO DE CAMPO -->
+    <!-- mb-3 = Margen inferior (margin-bottom) -->
+    <div class="mb-3">
+      <!-- Etiqueta del campo -->
+      <label class="form-label" for="title">Nombre de la tarea</label>
+      <!-- Campo de entrada pre-llenado -->
+      <!-- value="{{ tarea }}" = Muestra el valor actual de la tarea -->
+      <!-- required = Hace el campo obligatorio (no se puede enviar vacío) -->
+      <input name="title" class="form-control" type="text" id="title" value="{{ tarea }}" required>
+    </div>
+    <!-- GRUPO DE BOTONES -->
+    <!-- d-flex = Flexbox para alinear botones horizontalmente -->
+    <!-- gap-2 = Espacio entre los botones -->
+    <div class="d-flex gap-2">
+      <!-- Botón para guardar cambios -->
+      <button type="submit" class="btn btn-primary">Guardar cambios</button>
+      <!-- Botón para cancelar (enlace que redirige) -->
+      <!-- btn-secondary = Estilo de botón gris -->
+      <a href="/tareas" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,22 +1,54 @@
 <!DOCTYPE html>
+<!-- =============================================================================
+     TEMPLATE PRINCIPAL (LAYOUT) - APLICACIÓN FLASK
+     =============================================================================
+     Este archivo define la estructura HTML base que se reutiliza en todas las páginas
+     de la aplicación. Es como un "molde" que contiene los elementos comunes.
+     
+     CONCEPTOS CLAVE:
+     - Jinja2: Motor de plantillas de Flask que permite usar código Python en HTML
+     - {% block %}: Define secciones que pueden ser reemplazadas por otros templates
+     - {% extends %}: Permite que un template "herede" de otro template
+     - Bootstrap: Framework CSS que proporciona estilos y componentes predefinidos
+     ============================================================================= -->
 <html lang="en">
   <head>
+    <!-- Configuración básica del documento HTML -->
     <meta charset="UTF-8">
+    <!-- Viewport para hacer la página responsive (se adapte a móviles) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Título dinámico de la página -->
+    <!-- {% block title %}{% endblock %} será reemplazado por el título específico de cada página -->
     <title>{% block title %}{% endblock %} | Rutina.py</title>
+    <!-- Bootstrap CSS - Framework de estilos -->
+    <!-- CDN = Content Delivery Network - Carga Bootstrap desde internet -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   </head>
   <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <a href="/">Inicio</a>
-      <a href="/tareas">Tareas</a>
-      <a href="/acerca-de">Acerca de</a>
-    </nav>
+    <!-- CABECERA DE LA APLICACIÓN -->
+    <header class="container">
+      <!-- Barra de navegación usando Bootstrap -->
+      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <!-- Enlaces de navegación -->
+        <!-- href="/" = Ruta raíz de la aplicación -->
+        <a href="/">Inicio</a>
+        <!-- href="/tareas" = Ruta para ver las tareas -->
+        <a href="/tareas">Tareas</a>
+        <!-- href="/acerca-de" = Ruta para la página "Acerca de" -->
+        <a href="/acerca-de">Acerca de</a>
+      </nav>
+    </header>
+    <!-- Espaciado -->
     <br>
+    <!-- CONTENIDO PRINCIPAL -->
     <main class="container">
+      <!-- {% block content %} define una sección que será reemplazada -->
+      <!-- Cada página (index.html, tareas.html, etc.) definirá su propio contenido aquí -->
       {% block content %}
       {% endblock %}
     </main>
+    <!-- Bootstrap JavaScript - Necesario para componentes interactivos -->
+    <!-- Se carga al final para que la página se renderice más rápido -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
   </body>
 </html>

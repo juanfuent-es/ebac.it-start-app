@@ -1,6 +1,22 @@
+<!-- =============================================================================
+     TEMPLATE: PÁGINA "ACERCA DE"
+     =============================================================================
+     Esta página muestra información sobre la aplicación
+     
+     CONCEPTOS CLAVE:
+     - Página informativa: Explica qué hace la aplicación
+     - Contenido estático: No cambia dinámicamente
+     - Herencia de template: Usa la estructura base de layout.html
+     ============================================================================= -->
+<!-- Heredamos la estructura del template layout.html -->
 {% extends "layout.html" %}
+<!-- Definimos el título de esta página -->
 {% block title %}Acerca de{% endblock %}
+<!-- Definimos el contenido específico de esta página -->
 {% block content %}
+<!-- Título de la página -->
 <h1>Acerca de</h1>
+<!-- Descripción de la aplicación -->
+<!-- Esta información ayuda a los usuarios a entender qué hace la aplicación -->
 <p>Rutina.py es una aplicación web que te ayuda a crear y gestionar tus rutinas de entrenamiento.</p>
 {% endblock %}
