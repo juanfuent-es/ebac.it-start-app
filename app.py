@@ -8,7 +8,10 @@
 # Importamos las clases y funciones que necesitamos de Flask
 from flask import Flask, render_template, request, redirect, make_response
 import os
-from database import get_connection, init_db
+from database import init_db
+
+init_db()
+
 # Creamos una instancia de la aplicación Flask
 # __name__ es una variable especial de Python que contiene el nombre del módulo
 app = Flask(__name__)
@@ -170,23 +173,3 @@ def eliminar_tarea(indice):
     
     # Si el índice no es válido, redirigimos a la lista de tareas
     return redirect("/tareas")
-
-# =============================================================================
-# CONFIGURACIÓN PARA EJECUTAR LA APLICACIÓN
-# =============================================================================
-# Esta línea solo se ejecuta si ejecutamos este archivo directamente
-# (no si lo importamos desde otro archivo)
-if __name__ == "__main__":
-    # Evitamos ejecutar init_db() dos veces con el recargador de Flask
-    should_init = True
-    if app.debug and os.environ.get("WERKZEUG_RUN_MAIN") != "true":
-        should_init = False
-
-    if should_init:
-        init_db()
-
-    # debug=True activa el modo de desarrollo
-    # - Muestra errores detallados en el navegador
-    # - Reinicia automáticamente el servidor cuando cambias el código
-    # - Solo debe usarse en desarrollo, no en producción
-    app.run(debug=True)
