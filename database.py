@@ -1,76 +1,69 @@
 # database.py
 import sqlite3
-print(" * Inicializando base de datos")
 
-def get_connection():
+DATABASE_NAME = "tareas.sqlite"
+
+def connect_db():
     """
-    Abre/conecta a tareas.db y habilita integridad referencial.
-    Activar foreign_keys en cada conexión evita referencias inválidas.
+    Conecta a la base de datos
     """
-    conn = sqlite3.connect("tareas.db")
-    conn.execute("PRAGMA foreign_keys = ON;")
+    conn = sqlite3.connect(DATABASE_NAME) # Conecta a la base de datos
+    conn.execute("PRAGMA foreign_keys = ON") # Activa el modo de clave foránea
+    print(" * Conectado a la base de datos")
     return conn
 
 # Función para inicializar la base 
 def init_db():
-    conn = get_connection()
-    # En este método se define la estructura de la base de datos
-    # creando tablas, índices, etc.
-    try:
-        create_table_categorias(conn)
-        print(" * Tabla categorias creada")
-        create_table_tareas(conn)
-        print(" * Tabla tareas creada")
-        create_indices(conn)  # opcional: acelera consultas comunes
-        print(" * Índices creados")
-        conn.commit()
-    finally:
-        conn.close()
-    print(" * Base de datos conectada")
+    """
+    Inicializa la base de datos
+    En este método se define la estructura de la base de datos
+    creando tablas, índices, etc.
+    """
+    conn = connect_db()
+    print(" * Inicializando base de datos")
+    create_table_categorias(conn)
+    create_table_tareas(conn)
+    return conn
 
 def create_table_categorias(conn):
     """
     Tabla: categorias
-      - id (INTEGER, PK AUTOINCREMENT)
-      - nombre (TEXT, NOT NULL, UNIQUE)
+    Columnas:
+        - id (INTEGER PRIMARY KEY AUTOINCREMENT): Identificador único de la categoría
+        - nombre (TEXT NOT NULL UNIQUE): Nombre de la categoría (no puede repetirse)
     """
     conn.execute("""
         CREATE TABLE IF NOT EXISTS categorias (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL UNIQUE
-        );
+            nombre TEXT NOT NULL
+        )
     """)
+    conn.commit()
+    print(" * Tabla categorias creada")
 
 def create_table_tareas(conn):
     """
     Tabla: tareas
-      - id (INTEGER, PK AUTOINCREMENT)
-      - nombre (TEXT, NOT NULL)
-      - categoria_id (INTEGER, NOT NULL) -> FK a categorias(id)
-      - estado (TEXT, NOT NULL)  # 'pendiente', 'completada', etc.
-      - created_at (TEXT, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
-      - updated_at (TEXT, NOT NULL, DEFAULT CURRENT_TIMESTAMP)
+    Columnas:
+        - id (INTEGER PRIMARY KEY AUTOINCREMENT): Identificador único de la tarea
+        - nombre (TEXT NOT NULL): Nombre de la tarea
+        - estado (TEXT NOT NULL): Estado de la tarea (pendiente, en progreso, completada)
+        - categoria_id (INTEGER): Identificador de la categoría de la tarea (opcional)
+        - created_at (DATE): Fecha de creación de la tarea
+        - updated_at (DATE): Fecha de actualización de la tarea
     """
     conn.execute("""
         CREATE TABLE IF NOT EXISTS tareas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
+            estado TEXT NOT NULL DEFAULT 'pendiente',
             categoria_id INTEGER NOT NULL,
-            estado TEXT NOT NULL,
-            created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            created_at DATE NOT NULL DEFAULT CURRENT_DATE,
+            updated_at DATE NOT NULL DEFAULT CURRENT_DATE,
             FOREIGN KEY (categoria_id) REFERENCES categorias(id)
                 ON UPDATE CASCADE
                 ON DELETE RESTRICT
         );
     """)
-
-def create_indices(conn):
-    """
-    Índices recomendados según consultas más comunes:
-      - Buscar tareas por categoría y estado
-    """
-    conn.execute("""
-        CREATE INDEX IF NOT EXISTS idx_tareas_categoria_estado
-        ON tareas(categoria_id, estado);
-    """)
+    conn.commit()
+    print(" * Tabla tareas creada")
