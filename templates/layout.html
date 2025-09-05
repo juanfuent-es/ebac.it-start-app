@@ -7,8 +7,8 @@
      
      CONCEPTOS CLAVE:
      - Jinja2: Motor de plantillas de Flask que permite usar código Python en HTML
-     - {% block %}: Define secciones que pueden ser reemplazadas por otros templates
-     - {% extends %}: Permite que un template "herede" de otro template
+     - block: Define secciones que pueden ser reemplazadas por otros templates
+     - extends: Permite que un template "herede" de otro template
      - Bootstrap: Framework CSS que proporciona estilos y componentes predefinidos
      ============================================================================= -->
 <html lang="en">
@@ -18,7 +18,7 @@
     <!-- Viewport para hacer la página responsive (se adapte a móviles) -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Título dinámico de la página -->
-    <!-- {% block title %}{% endblock %} será reemplazado por el título específico de cada página -->
+    <!-- block title será reemplazado por el título específico de cada página -->
     <title>{% block title %}{% endblock %} | Rutina.py</title>
     <!-- Bootstrap CSS - Framework de estilos -->
     <!-- CDN = Content Delivery Network - Carga Bootstrap desde internet -->
@@ -42,7 +42,7 @@
     <br>
     <!-- CONTENIDO PRINCIPAL -->
     <main class="container">
-      <!-- {% block content %} define una sección que será reemplazada -->
+      <!-- block content define una sección que será reemplazada -->
       <!-- Cada página (index.html, tareas.html, etc.) definirá su propio contenido aquí -->
       {% block content %}
       {% endblock %}

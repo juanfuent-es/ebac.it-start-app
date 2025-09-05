@@ -27,33 +27,21 @@
   <!-- Botón para crear nueva tarea -->
   <!-- Este botón lleva al formulario de creación -->
   <a href="/nueva-tarea" class="btn btn-primary mb-3" title="Crear Nueva Tarea">Nueva Tarea</a>
-  <!-- CONDICIONAL: Verificamos si hay tareas para mostrar -->
-  {% if tareas %}
-  <!-- Si hay tareas, las mostramos en una lista -->
-  <div class="list-group">
-    <!-- BUCLE: Iteramos sobre cada tarea en la lista -->
-    {% for tarea in tareas %}
-    <!-- Cada tarea se muestra en un elemento de la lista -->
-    <div class="list-group-item d-flex justify-content-between align-items-center">
-      <!-- Nombre de la tarea -->
-      <span>{{ tarea }}</span>
-      <!-- Botones de acción para cada tarea -->
-      <div class="btn-group" role="group">
-        <!-- Botón para editar la tarea -->
-        <a href="/editar-tarea/{{ loop.index0 }}" class="btn btn-sm btn-outline-primary">Editar</a>
-        <!-- Botón para eliminar la tarea -->
-        <!-- onclick="..." = Confirma antes de eliminar -->
-        <a href="/eliminar-tarea/{{ loop.index0 }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que quieres eliminar esta tarea?')">Eliminar</a>
-      </div>
-    </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <!-- Si no hay tareas, mostramos un mensaje informativo -->
-  <!-- alert-info = Alerta azul de Bootstrap -->
+  <!-- Mensaje de bienvenida -->
   <div class="alert alert-info">
-    No hay tareas pendientes. ¡Agrega una nueva tarea!
+    <h4>¡Bienvenido a Rutina.py!</h4>
+    <p>Esta es una aplicación para gestionar tus tareas diarias.</p>
+    <p>Usa los enlaces de navegación para:</p>
+    <ul>
+      <li><strong>Crear nuevas tareas</strong>
+        - Agrega tareas a tu lista</li>
+      <li><strong>Ver todas las tareas</strong>
+        - Revisa tu lista completa</li>
+      <li><strong>Editar tareas</strong>
+        - Modifica tareas existentes</li>
+      <li><strong>Eliminar tareas</strong>
+        - Borra tareas completadas</li>
+    </ul>
   </div>
-  {% endif %}
 </div>
 {% endblock %}

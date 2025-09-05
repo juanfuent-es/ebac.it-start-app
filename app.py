@@ -7,10 +7,13 @@
 
 # Importamos las clases y funciones que necesitamos de Flask
 from flask import Flask, render_template, request, redirect, make_response
-
+from database import get_connection, init_db
 # Creamos una instancia de la aplicación Flask
 # __name__ es una variable especial de Python que contiene el nombre del módulo
 app = Flask(__name__)
+
+# Inicializamos la base de datos
+init_db()
 
 # =============================================================================
 # DEFINICIÓN DE RUTAS (ROUTES)
@@ -97,11 +100,18 @@ def acerca_de():
 @app.route('/filtrar-tareas/<filtro>')
 def tareas_filtradas(filtro):
     """
-    Ruta para filtrar tareas (FUNCIONALIDAD INCOMPLETA)
+    Ruta para filtrar tareas
     El parámetro <filtro> en la URL se pasa como argumento a la función
     """
-    # NOTA: Esta función no está implementada completamente
-    # tareas_filtradas no está definida, lo que causaría un error
+    # Obtenemos todas las tareas desde las cookies
+    tareas = request.cookies.get("tareas", "")
+    lista_tareas = tareas.split(",") if tareas else []
+    
+    # Filtramos las tareas que contengan el texto del filtro
+    # Convertimos tanto la tarea como el filtro a minúsculas para búsqueda insensible a mayúsculas
+    tareas_filtradas = [tarea for tarea in lista_tareas if filtro.lower() in tarea.lower()]
+    
+    # Pasamos las tareas filtradas al template
     return render_template("tareas.html", tareas=tareas_filtradas)
 
 @app.route("/editar-tarea/<int:indice>", methods=["GET", "POST"])
