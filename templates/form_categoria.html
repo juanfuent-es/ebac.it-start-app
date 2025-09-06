@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+{% block title %}{{ 'Editar' if categoria else 'Nueva' }} Categoría{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <h1>{{ 'Editar' if categoria else 'Nueva' }} Categoría</h1>
+  <form action="{{ url_for('editar_categoria', categoria_id=categoria[0]) if categoria else url_for('nueva_categoria') }}" method="post">
+    <div class="mb-3">
+      <label class="form-label" for="nombre">Nombre</label>
+      <input name="nombre" id="nombre" type="text" class="form-control" value="{{ categoria[1] if categoria else '' }}" required>
+    </div>
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-primary">Guardar</button>
+      <a href="/categorias" class="btn btn-secondary">Cancelar</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
+

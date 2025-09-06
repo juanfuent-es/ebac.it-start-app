@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block title %}Categorías{% endblock %}
+{% block content %}
+<div class="container mt-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Categorías</h1>
+    <a href="/nueva-categoria" class="btn btn-primary">Nueva categoría</a>
+  </div>
+  {% if categorias %}
+  <div class="list-group">
+    {% for c in categorias %}
+    <!-- c = (id, nombre, created_at, updated_at) -->
+    <div class="list-group-item d-flex justify-content-between align-items-center">
+      <div>
+        <strong>{{ c[1] }}</strong>
+        <div><small class="text-muted">Creada: {{ c[2] }}</small></div>
+      </div>
+      <div class="btn-group">
+        <a href="/editar-categoria/{{ c[0] }}" class="btn btn-sm btn-outline-primary">Editar</a>
+        <a href="/eliminar-categoria/{{ c[0] }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Eliminar categoría?')">Eliminar</a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="alert alert-info">No hay categorías.</div>
+  {% endif %}
+</div>
+{% endblock %}
+
