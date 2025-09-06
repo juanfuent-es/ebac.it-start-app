@@ -50,8 +50,8 @@ def create_table_tareas(conn):
         - nombre (TEXT NOT NULL): Nombre de la tarea
         - estado (TEXT NOT NULL): Estado de la tarea (pendiente, en progreso, completada)
         - categoria_id (INTEGER): Identificador de la categoría de la tarea (opcional)
-        - created_at (DATE): Fecha de creación de la tarea
-        - updated_at (DATE): Fecha de actualización de la tarea
+        - created_at (TEXT): Fecha y hora de creación de la tarea
+        - updated_at (TEXT): Fecha y hora de actualización de la tarea
     """
     conn.execute("""
         CREATE TABLE IF NOT EXISTS tareas (
@@ -59,8 +59,8 @@ def create_table_tareas(conn):
             nombre TEXT NOT NULL,
             estado TEXT NOT NULL DEFAULT 'pendiente',
             categoria_id INTEGER NOT NULL,
-            created_at DATE NOT NULL DEFAULT CURRENT_DATE,
-            updated_at DATE NOT NULL DEFAULT CURRENT_DATE,
+            created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+            updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
             FOREIGN KEY (categoria_id) REFERENCES categorias(id)
                 ON UPDATE CASCADE
                 ON DELETE RESTRICT
@@ -80,3 +80,35 @@ def create_indices(conn):
     """)
     conn.commit()
     print(" * Índice idx_tareas_categoria_estado creado")
+
+# -----------------------------------------------------------------------------
+# Helpers simples: ejecutar consultas sin repetir conexión
+# C - CREATE -> INSERT
+# R - READ -> SELECT
+# U - UPDATE -> UPDATE
+# D - DELETE -> DELETE
+# -----------------------------------------------------------------------------
+def execute(sql, params=None):
+    """
+    Ejecuta INSERT/UPDATE/DELETE. Devuelve lastrowid si aplica, o None.
+    """
+    conn = connect_db()
+    cur = conn.execute(sql, params or ())
+    conn.commit()
+    last_id = cur.lastrowid
+    conn.close()
+    return last_id
+
+def query_all(sql, params=None):
+    """Ejecuta SELECT y devuelve lista de filas."""
+    conn = connect_db()
+    rows = conn.execute(sql, params or ()).fetchall()
+    conn.close()
+    return rows
+
+def query_one(sql, params=None):
+    """Ejecuta SELECT y devuelve una fila o None."""
+    conn = connect_db()
+    row = conn.execute(sql, params or ()).fetchone()
+    conn.close()
+    return row
