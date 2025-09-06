@@ -35,15 +35,18 @@
     {% for tarea in tareas %}
     <!-- Cada tarea se muestra en un elemento de la lista -->
     <div class="list-group-item d-flex justify-content-between align-items-center">
-      <!-- Nombre de la tarea -->
-      <span>{{ tarea }}</span>
+      <!-- tarea del JOIN: (id, nombre, estado, categoria_id, categoria, created, updated) -->
+      <div>
+        <div><strong>{{ tarea[1] }}</strong> <span class="badge bg-secondary">{{ tarea[2] }}</span></div>
+        <small class="text-muted">Categoría: {{ tarea[4] }}</small>
+      </div>
       <!-- Botones de acción para cada tarea -->
       <div class="btn-group" role="group">
         <!-- Botón para editar la tarea -->
-        <a href="/editar-tarea/{{ loop.index0 }}" class="btn btn-sm btn-outline-primary">Editar</a>
+        <a href="/editar-tarea/{{ tarea[0] }}" class="btn btn-sm btn-outline-primary">Editar</a>
         <!-- Botón para eliminar la tarea -->
         <!-- onclick="..." = Confirma antes de eliminar -->
-        <a href="/eliminar-tarea/{{ loop.index0 }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que quieres eliminar esta tarea?')">Eliminar</a>
+        <a href="/eliminar-tarea/{{ tarea[0] }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que quieres eliminar esta tarea?')">Eliminar</a>
       </div>
     </div>
     {% endfor %}

@@ -34,6 +34,15 @@
   <input name="title" class="form-control" type="text" id="nombre">
   <!-- Espaciado -->
   <br>
+  <!-- Selección de categoría -->
+  <label class="form-label" for="categoria_id">Categoría</label>
+  <select name="categoria_id" id="categoria_id" class="form-select">
+    {% for c in categorias %}
+    <!-- c = (id, nombre, created_at, updated_at) -->
+    <option value="{{ c[0] }}">{{ c[1] }}</option>
+    {% endfor %}
+  </select>
+  <br>
   <!-- BOTÓN DE ENVÍO -->
   <!-- type="submit" = Botón que envía el formulario -->
   <!-- class="btn btn-primary" = Estilo de botón azul de Bootstrap -->

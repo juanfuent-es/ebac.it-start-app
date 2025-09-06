@@ -38,8 +38,11 @@
     <!-- d-flex justify-content-between = Flexbox para alinear elementos -->
     <!-- align-items-center = Centra verticalmente los elementos -->
     <div class="list-group-item d-flex justify-content-between align-items-center">
-      <!-- Mostramos el nombre de la tarea -->
-      <span>{{ tarea }}</span>
+      <!-- tarea es una tupla del JOIN: (id, nombre, estado, categoria_id, categoria, created, updated) -->
+      <div>
+        <div><strong>{{ tarea[1] }}</strong> <span class="badge bg-secondary">{{ tarea[2] }}</span></div>
+        <small class="text-muted">Categoría: {{ tarea[4] }}</small>
+      </div>
       <!-- Grupo de botones para cada tarea -->
       <!-- btn-group = Agrupa botones horizontalmente -->
       <!-- role="group" = Accesibilidad para lectores de pantalla -->
@@ -48,11 +51,11 @@
         <!-- btn-sm = Botón pequeño -->
         <!-- btn-outline-primary = Botón con borde azul -->
         <!-- {{ loop.index0 }} = Índice de la tarea actual (empieza en 0) -->
-        <a href="/editar-tarea/{{ loop.index0 }}" class="btn btn-sm btn-outline-primary">Editar</a>
+        <a href="/editar-tarea/{{ tarea[0] }}" class="btn btn-sm btn-outline-primary">Editar</a>
         <!-- Botón Eliminar -->
         <!-- btn-outline-danger = Botón con borde rojo -->
         <!-- onclick="..." = JavaScript que pide confirmación antes de eliminar -->
-        <a href="/eliminar-tarea/{{ loop.index0 }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que quieres eliminar esta tarea?')">Eliminar</a>
+        <a href="/eliminar-tarea/{{ tarea[0] }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que quieres eliminar esta tarea?')">Eliminar</a>
       </div>
     </div>
     {% endfor %}

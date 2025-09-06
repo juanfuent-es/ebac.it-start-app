@@ -36,12 +36,24 @@
         <a href="/tareas">Tareas</a>
         <!-- href="/acerca-de" = Ruta para la página "Acerca de" -->
         <a href="/acerca-de">Acerca de</a>
+        <!-- Gestión de categorías -->
+        <a href="/categorias">Categorías</a>
       </nav>
     </header>
     <!-- Espaciado -->
     <br>
     <!-- CONTENIDO PRINCIPAL -->
     <main class="container">
+      <!-- Mensajes flash -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+      <div class="mb-3">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ 'warning' if category == 'warning' else 'info' }}" role="alert">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
       <!-- {% block content %} define una sección que será reemplazada -->
       <!-- Cada página (index.html, tareas.html, etc.) definirá su propio contenido aquí -->
       {% block content %}
