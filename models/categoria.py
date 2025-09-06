@@ -1,47 +1,50 @@
-"""Modelo Categoria (versión simple para principiantes).
-
-Devuelve tipos básicos (id y filas) y usa solo métodos estáticos.
-"""
-
 from database import execute, query_one, query_all
-
-""" CRUD
-- C - CREATE -> INSERT
-- R - READ -> SELECT
-- U - UPDATE -> UPDATE
-- D - DELETE -> DELETE
-"""
 
 class Categoria:
     """Operaciones básicas sobre la tabla `categorias`."""
-
+    # ------------------------------------------------------------------
+    # Crear
+    # ------------------------------------------------------------------
     @staticmethod
     def create(nombre):
         """Crea una categoría y devuelve su id (int)."""
-        return execute("INSERT INTO categorias (nombre) VALUES (?)", (nombre,))
+        query = execute("INSERT INTO categorias (nombre) VALUES (?)", (nombre,))
+        print(f" * Categoría creada: {query}")
+        return query
 
+    # ------------------------------------------------------------------
+    # Leer (SELECT)
+    # ------------------------------------------------------------------
     @staticmethod
     def get_by_id(categoria_id):
         """Devuelve una fila (id, nombre) o None."""
-        return query_one(
-            "SELECT id, nombre FROM categorias WHERE id = ?",
-            (categoria_id,),
-        )
+        query = query_one("SELECT id, nombre FROM categorias WHERE id = ?", (categoria_id,))
+        print(f" * Categoría: {query}")
+        return query
 
     @staticmethod
     def get_all():
-        """Devuelve una lista de filas (id, nombre)."""
-        return query_all("SELECT id, nombre FROM categorias ORDER BY id")
+        """Devuelve lista de filas con todas las categorías."""
+        query = query_all("SELECT id, nombre FROM categorias ORDER BY id")
+        print(f" * Categorías: {query}")
+        return query
 
+    # ------------------------------------------------------------------
+    # Actualizar (UPDATE)
+    # ------------------------------------------------------------------
     @staticmethod
     def update(categoria_id, nuevo_nombre):
-        """Cambia el nombre de la categoría indicada."""
-        execute(
-            "UPDATE categorias SET nombre = ? WHERE id = ?",
-            (nuevo_nombre, categoria_id),
-        )
+        """Actualiza el nombre de la categoría."""
+        query = execute("UPDATE categorias SET nombre = ? WHERE id = ?", (nuevo_nombre, categoria_id))
+        print(f" * Nombre de categoría actualizada a: {nuevo_nombre}")
+        return query
 
+    # ------------------------------------------------------------------
+    # Eliminar (DELETE)
+    # ------------------------------------------------------------------
     @staticmethod
     def delete(categoria_id):
-        """Elimina la categoría indicada (si no hay tareas vinculadas)."""
-        execute("DELETE FROM categorias WHERE id = ?", (categoria_id,))
+        """Elimina la categoría indicada."""
+        query = execute("DELETE FROM categorias WHERE id = ?", (categoria_id,))
+        print(f" * Categoría eliminada: {query}")
+        return query

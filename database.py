@@ -9,7 +9,7 @@ def connect_db():
     """
     conn = sqlite3.connect(DATABASE_NAME) # Conecta a la base de datos
     conn.execute("PRAGMA foreign_keys = ON") # Activa el modo de clave foránea
-    print(" * Conectado a la base de datos")
+    # print(" * Conectado a la base de datos")
     return conn
 
 # Función para inicializar la base 
