@@ -23,6 +23,7 @@ def init_db():
     print(" * Inicializando base de datos")
     create_table_categorias(conn)
     create_table_tareas(conn)
+    create_indices(conn)
     return conn
 
 def create_table_categorias(conn):
@@ -35,7 +36,7 @@ def create_table_categorias(conn):
     conn.execute("""
         CREATE TABLE IF NOT EXISTS categorias (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL
+            nombre TEXT NOT NULL UNIQUE
         )
     """)
     conn.commit()
@@ -67,3 +68,15 @@ def create_table_tareas(conn):
     """)
     conn.commit()
     print(" * Tabla tareas creada")
+
+def create_indices(conn):
+    """
+    Índices recomendados según consultas más comunes:
+      - Buscar tareas por categoría y estado
+    """
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_tareas_categoria_estado
+        ON tareas(categoria_id, estado);
+    """)
+    conn.commit()
+    print(" * Índice idx_tareas_categoria_estado creado")
