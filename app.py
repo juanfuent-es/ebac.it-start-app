@@ -45,14 +45,21 @@ def nueva_tarea():
         # Las cookies son pequeños archivos que se guardan en el navegador del usuario
         # get() devuelve el valor de la cookie o una cadena vacía si no existe
         tareas = request.cookies.get("tareas", "")
+        estados = request.cookies.get("estados", "")
+        categorias = request.cookies.get("categorias", "")
         
         # CONVERTIMOS LA CADENA DE TAREAS EN UNA LISTA
         # Ejemplo: "Barrer,Limpiar,Estudiar" -> ["Barrer", "Limpiar", "Estudiar"]
         # Si no hay tareas, creamos una lista vacía
         lista = tareas.split(",") if tareas else []
+        lista_estados = estados.split(",") if estados else []
+        lista_categorias = categorias.split(",") if categorias else []
         
         # AGREGAMOS LA NUEVA TAREA A LA LISTA
         lista.append(nombre)
+        # Inicializamos estado y categoría por defecto
+        lista_estados.append("pendiente")
+        lista_categorias.append("-")
         
         # CREAMOS UNA RESPUESTA DE REDIRECCIÓN
         # make_response() nos permite crear una respuesta personalizada
@@ -63,6 +70,8 @@ def nueva_tarea():
         # join() convierte la lista en una cadena separada por comas
         # set_cookie() guarda la información en el navegador del usuario
         response.set_cookie("tareas", ",".join(lista))
+        response.set_cookie("estados", ",".join(lista_estados))
+        response.set_cookie("categorias", ",".join(lista_categorias))
         
         return response
     else:
@@ -85,6 +94,60 @@ def mostrar_tareas():
     # El segundo parámetro (tareas=lista_tareas) hace que la variable
     # 'tareas' esté disponible en el template HTML
     return render_template("tareas.html", tareas=lista_tareas)
+
+@app.route("/tarea/<int:indice>")
+def detalle_tarea(indice: int):
+    """
+    Muestra el detalle de una tarea: nombre, estado y categoría.
+    """
+    tareas = request.cookies.get("tareas", "")
+    estados = request.cookies.get("estados", "")
+    categorias = request.cookies.get("categorias", "")
+
+    lista_tareas = tareas.split(",") if tareas else []
+    lista_estados = estados.split(",") if estados else []
+    lista_categorias = categorias.split(",") if categorias else []
+
+    if indice >= len(lista_tareas):
+        return redirect("/tareas")
+
+    tarea_actual = lista_tareas[indice]
+    estado_actual = lista_estados[indice] if indice < len(lista_estados) else "pendiente"
+    categoria_nombre = lista_categorias[indice] if indice < len(lista_categorias) else "-"
+
+    return render_template(
+        "tarea.html",
+        tarea=tarea_actual,
+        estado=estado_actual,
+        categoria_nombre=categoria_nombre,
+        indice=indice,
+    )
+
+@app.route("/tarea/<int:indice>/actualizar-estado", methods=["POST"]) 
+def actualizar_estado_tarea(indice: int):
+    """
+    Actualiza el estado de una tarea (p.ej., de pendiente a listo) y redirige al detalle.
+    """
+    nuevo_estado = request.form.get("nuevo_estado", "listo")
+
+    estados = request.cookies.get("estados", "")
+    lista_estados = estados.split(",") if estados else []
+
+    tareas = request.cookies.get("tareas", "")
+    lista_tareas = tareas.split(",") if tareas else []
+
+    if indice >= len(lista_tareas):
+        return redirect("/tareas")
+
+    # Aseguramos largo de estados
+    while len(lista_estados) < len(lista_tareas):
+        lista_estados.append("pendiente")
+
+    lista_estados[indice] = nuevo_estado
+
+    response = make_response(redirect(f"/tarea/{indice}"))
+    response.set_cookie("estados", ",".join(lista_estados))
+    return response
 
 @app.route('/acerca-de')
 def acerca_de():
