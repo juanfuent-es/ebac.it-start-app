@@ -34,7 +34,7 @@
   <!-- class="form-control" = Estilo de Bootstrap para campos de entrada -->
   <!-- type="text" = Tipo de entrada (texto) -->
   <!-- id="nombre" = Identificador único del campo (se asocia con for="nombre") -->
-  <input name="title" class="form-control" type="text" id="nombre" value="{{ nombre or '' }}" required>
+  <input name="title" class="form-control" type="text" id="nombre" required>
   <!-- Selección de categoría -->
   <!-- Soporta elegir una categoría existente o crear una nueva escribiendo el nombre -->
   <br>
@@ -42,19 +42,13 @@
   <select
     id="categoria"
     name="categoria"
-    class="form-select"
     placeholder="Selecciona o crea una categoría"
   >
-    <option value="">Selecciona una categoría</option>
+    <option value="" disabled selected>Selecciona una categoría</option>
     {% if categorias %}
       {% for c in categorias %}
-        {% set is_selected = categoria_seleccionada is not none and (categoria_seleccionada|string) == (c.id|string) %}
-        {% if is_selected %}
-    <option value="{{ c.id }}" selected>{{ c.nombre }}</option>
-    {% else %}
     <option value="{{ c.id }}">{{ c.nombre }}</option>
-    {% endif %}
-      {% endfor %}
+    {% endfor %}
     {% endif %}
   </select>
   <!-- Espaciado -->
@@ -62,13 +56,16 @@
   <!-- BOTÓN DE ENVÍO -->
   <!-- type="submit" = Botón que envía el formulario -->
   <!-- class="btn btn-primary" = Estilo de botón azul de Bootstrap -->
-  <button type="submit" class="btn btn-primary">Guardar</button>
+  <button type="submit" class="btn btn-primary">
+    <i class="bi bi-save me-1"></i>
+    Guardar
+  </button>
 </form>
 <!-- Tom Select: permite crear opciones nuevas al vuelo sin jQuery -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
 <script>
-  /* document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     var el = document.getElementById('categoria');
     if (el) {
       new TomSelect(el, {
@@ -82,6 +79,6 @@
         placeholder: 'Selecciona o crea una categoría'
       });
     }
-  }); */
+  });
 </script>
 {% endblock %}

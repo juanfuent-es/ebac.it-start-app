@@ -26,11 +26,23 @@
           <form action="/tarea/{{ tarea.id }}/toggle-estado" method="post" class="m-0 p-0">
             {% set es_completada = tarea.estado == 'completada' %}
             <button type="submit" class="btn {{ 'btn-warning' if es_completada else 'btn-success' }}">
-              {{ 'Marcar como pendiente' if es_completada else 'Marcar como completada' }}
+              {% if es_completada %}
+              <i class="bi bi-arrow-counterclockwise me-1"></i>
+              Marcar como pendiente
+              {% else %}
+              <i class="bi bi-check2-circle me-1"></i>
+              Marcar como completada
+              {% endif %}
             </button>
           </form>
-          <a href="/editar/{{ tarea.id }}" class="btn btn-primary">Editar</a>
-          <a href="/" class="btn btn-outline-secondary">Volver</a>
+          <a href="/editar/{{ tarea.id }}" class="btn btn-primary">
+            <i class="bi bi-pencil-square me-1"></i>
+            Editar
+          </a>
+          <a href="/" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>
+            Volver
+          </a>
         </div>
       </div>
     </div>

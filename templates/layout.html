@@ -20,16 +20,17 @@
     <!-- Título dinámico de la página -->
     <!-- block title será reemplazado por el título específico de cada página -->
     <title>{% block title %}{% endblock %} | Rutina.py</title>
-
-    <link rel="icon" type="image/png" href="/static/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
-    <link rel="shortcut icon" href="/static/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png" />
-    <meta name="apple-mobile-web-app-title" content="Rutina.py" />
-    <link rel="manifest" href="/static/site.webmanifest" />
+    <link rel="icon" type="image/png" href="/static/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-title" content="Rutina.py">
+    <link rel="manifest" href="/static/site.webmanifest">
     <!-- Bootstrap CSS - Framework de estilos -->
     <!-- CDN = Content Delivery Network - Carga Bootstrap desde internet -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
   </head>
   <body>
     <!--
@@ -51,6 +52,15 @@
     <br>
     <!-- CONTENIDO PRINCIPAL -->
     <main class="container">
+      {% with messages = get_flashed_messages(with_categories=True) %}
+      {% if messages %}
+      <div class="mt-2">
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% endwith %}
       <!-- block content define una sección que será reemplazada -->
       <!-- Cada página (index.html, tareas.html, etc.) definirá su propio contenido aquí -->
       {% block content %}
