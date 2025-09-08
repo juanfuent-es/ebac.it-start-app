@@ -18,6 +18,9 @@
 {% block content %}
 <!-- Título de la página -->
 <h1>Nueva Tarea</h1>
+{% if error %}
+<div class="alert alert-danger" role="alert">{{ error }}</div>
+{% endif %}
 <!-- FORMULARIO HTML -->
 <!-- action="/crear" = URL donde se envían los datos -->
 <!-- method="post" = Método HTTP para enviar datos de forma segura -->
@@ -31,7 +34,7 @@
   <!-- class="form-control" = Estilo de Bootstrap para campos de entrada -->
   <!-- type="text" = Tipo de entrada (texto) -->
   <!-- id="nombre" = Identificador único del campo (se asocia con for="nombre") -->
-  <input name="title" class="form-control" type="text" id="nombre">
+  <input name="title" class="form-control" type="text" id="nombre" value="{{ nombre or '' }}">
   <!-- Selección de categoría -->
   <!-- Soporta elegir una categoría existente o crear una nueva escribiendo el nombre -->
   <br>
@@ -45,7 +48,7 @@
     <option value="">Selecciona una categoría</option>
     {% if categorias %}
       {% for c in categorias %}
-    <option value="{{ c.id }}">{{ c.nombre }}</option>
+    <option value="{{ c.id }}" {% if categoria_input and (categoria_input|string) == (c.id|string) %}selected{% endif %}>{{ c.nombre }}</option>
     {% endfor %}
     {% endif %}
   </select>
