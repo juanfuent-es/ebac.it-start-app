@@ -19,6 +19,31 @@ from models.tarea import Tarea
 app = Flask(__name__)
 init_db()
 
+# -----------------------------------------------------------------------------
+# Utilidad: resolver y validar categoría (por id o por nombre)
+# -----------------------------------------------------------------------------
+def _resolver_categoria_id(valor_categoria):
+    """
+    Dado un valor enviado desde el formulario en el campo "categoria",
+    intenta resolver el id de la categoría:
+      - Si es un número válido, verifica que exista por id
+      - Si no es número, busca por nombre (case-insensitive)
+
+    Devuelve el id (int) si existe o None si no se encontró.
+    """
+    if not valor_categoria:
+        return None
+    # Intentar tratarlo como id numérico
+    try:
+        posible_id = int(valor_categoria)
+        fila = Categoria.get_by_id(posible_id)
+        return fila["id"] if fila else None
+    except (ValueError, TypeError):
+        pass
+    # Buscar por nombre exacto (insensible a mayúsculas)
+    fila = Categoria.get_by_nombre(valor_categoria)
+    return fila["id"] if fila else None
+
 # =============================================================================
 # ESQUEMATIZA TUS RUTAS CRUD - Crear, Leer, Actualizar, Eliminar
 # =============================================================================
@@ -55,7 +80,13 @@ def nueva_tarea():
     if request.method == "POST":
         # Obtenemos el título de la tarea desde el formulario
         nombre = request.form["title"]
-        categoria_id = request.form["categoria"]
+        valor_categoria = request.form.get("categoria")
+        categoria_id = _resolver_categoria_id(valor_categoria)
+        if categoria_id is None:
+            # Si no existe la categoría, regresamos al formulario
+            categorias = Categoria.get_all()
+            error = "La categoría indicada no existe. Selecciona una válida."
+            return render_template("formulario.html", categorias=categorias, error=error, nombre=nombre, categoria_input=valor_categoria)
         Tarea.create(nombre=nombre, categoria_id=categoria_id)
         return redirect("/")
     else:

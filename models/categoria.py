@@ -29,6 +29,13 @@ class Categoria:
         print(f" * Categorías: {query}")
         return query
 
+    @staticmethod
+    def get_by_nombre(nombre):
+        """Devuelve una fila (id, nombre) cuyo nombre coincide exactamente, o None."""
+        query = query_one("SELECT id, nombre FROM categorias WHERE lower(nombre) = lower(?)", (nombre,))
+        print(f" * Categoría por nombre '{nombre}': {query}")
+        return query
+
     # ------------------------------------------------------------------
     # Actualizar (UPDATE)
     # ------------------------------------------------------------------
