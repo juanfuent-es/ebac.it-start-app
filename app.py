@@ -76,6 +76,17 @@ def api_tareas_show(id):
     actualizado = Tarea.get_by_id(id)
     return jsonify(dict(actualizado))
 
+@app.route('/api/tarea/<int:id>/toggle-estado', methods=["POST", "PATCH"])
+def api_tareas_toggle_estado(id):
+    """Alterna el estado de la tarea (pendiente <-> completada) y devuelve el registro actualizado como JSON."""
+    registro = Tarea.get_by_id(id)
+    if not registro:
+        return jsonify({"error": "404: Tarea no encontrada"}), 404
+    nuevo_estado = "pendiente" if registro["estado"] == "completada" else "completada"
+    Tarea.set_estado(id, nuevo_estado)
+    actualizado = Tarea.get_by_id(id)
+    return jsonify(dict(actualizado))
+
 @app.route('/api/tareas', methods=["POST"])
 def api_tareas_create():
     if not request.is_json:

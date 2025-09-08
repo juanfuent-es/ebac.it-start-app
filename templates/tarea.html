@@ -23,7 +23,7 @@
           </dl>
         </div>
         <div class="card-footer d-flex gap-2">
-          <form action="/tarea/{{ tarea.id }}/toggle-estado" method="post" class="m-0 p-0">
+          <form action="/tarea/{{ tarea.id }}/toggle-estado" method="post" class="m-0 p-0" data-id="{{ tarea.id }}" id="toggle-estado-form">
             {% set es_completada = tarea.estado == 'completada' %}
             <button type="submit" class="btn {{ 'btn-warning' if es_completada else 'btn-success' }}">
               {% if es_completada %}
@@ -50,20 +50,17 @@
 </section>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('form[action$="/toggle-estado"][method="post"]');
+    const form = document.querySelector('#toggle-estado-form');
     if (!form) return;
     form.addEventListener('submit', async (ev) => {
-      ev.preventDefault();
-      // Inferir id desde la action
-      const action = form.getAttribute('action');
-      const parts = action.split('/');
-      const id = parts[2];
+      ev.preventDefault();  
+      const id = form.getAttribute('data-id');
       // Obtener estado actual desde badge si está disponible
       const badge = document.querySelector('#tarea .badge');
       const estadoActual = badge ? badge.textContent.trim().toLowerCase() : null;
       const nuevoEstado = estadoActual === 'completada' ? 'pendiente' : 'completada';
       try {
-        await apiFetch(`/api/tarea/${id}`, {
+        await apiFetch(`/api/tarea/${id}/toggle-estado`, {
           method: 'PATCH',
           body: JSON.stringify({ estado: nuevoEstado })
         });
