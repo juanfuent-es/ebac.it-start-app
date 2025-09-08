@@ -78,12 +78,13 @@ def editar(id): # EDITA Y ACTUALIZA UNA TAREA EXISTENTE
     tarea = Tarea.get_by_id(id)
     if request.method == "POST":
         nombre = request.form.get("title", "")
-        categoria = Categoria.get_or_create(request.form.get("categoria"))
+        categoria = request.form.get("categoria", "")
         try:
-            nombre_ok, categoria_ok = Tarea.validate(nombre, categoria["id"])
+            categoria_id = Categoria.get_or_create(categoria)
+            nombre_ok, categoria_ok = Tarea.validate(nombre, categoria_id)
         except ValueError as err:
             flash(str(err), "danger")
-            return redirect(f"/editar/{id}?nombre={nombre}&categoria={(categoria and categoria['nombre']) or ''}")
+            return redirect(f"/editar/{id}?nombre={nombre}&categoria={categoria}")
         # Actualizamos nombre
         Tarea.update(id, str(nombre_ok).strip())
         # Movemos de categoría si cambió

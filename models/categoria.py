@@ -31,9 +31,9 @@ class Categoria:
 
     @staticmethod
     def get_or_create(nombre):
+        """Devuelve un id; crea la categoría si no existe. Limpia y valida nombre."""
         if nombre == "":
             raise ValueError("El nombre de la categoría es obligatorio")
-        """Devuelve un id; crea la categoría si no existe. Limpia y valida nombre."""
         row = Categoria.get_by_name(nombre)
         if not row:
             return Categoria.create(nombre)
