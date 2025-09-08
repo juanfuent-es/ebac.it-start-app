@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 124 124">
+  <defs>
+    <style>
+      .st0 {
+        fill: none;
+        stroke: #0a58ca;
+        stroke-miterlimit: 10;
+        stroke-width: 10px;
+      }
+    </style>
+  </defs>
+  <circle class="st0" cx="62.04" cy="62.04" r="56.81"/>
+  <polyline class="st0" points="34.2 49.54 56.72 72.07 95.46 33.33"/>
+</svg>
