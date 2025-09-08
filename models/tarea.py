@@ -74,7 +74,7 @@ class Tarea:
     def get_all():
         """Devuelve lista de filas con todas las tareas."""
         return query_all(
-            "SELECT id, nombre, estado, categoria_id, created_at, updated_at FROM tareas ORDER BY id"
+            "SELECT id, nombre FROM tareas ORDER BY id"
         )
 
     # ------------------------------------------------------------------

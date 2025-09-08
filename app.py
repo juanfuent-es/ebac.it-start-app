@@ -10,7 +10,7 @@
 # En esta sección importamos dependencias, inicializamos la base
 # de datos y declaramos utilidades de apoyo.
 # Importamos las clases y funciones que necesitamos de Flask
-from flask import Flask, render_template, request, redirect, flash, abort
+from flask import Flask, render_template, request, redirect, flash, abort, jsonify
 import sqlite3
 from database import init_db
 from models.categoria import Categoria
@@ -35,6 +35,22 @@ init_db()
 #   - GET  /eliminar/<id>           -> Elimina una tarea desde la interfaz
 #   - GET  /filtrar/<filtro>        -> Listado filtrado por categoría o estado
 #   - GET  /acerca                  -> Página "Acerca de"
+
+
+# =============================================================================
+# API JSON - 'Endpoints' para Tarea (index y show)
+# =============================================================================
+@app.route('/api/tareas', methods=["GET"])
+def api_tareas_index():
+    registros = Tarea.get_all()
+    return jsonify([dict(fila) for fila in registros])
+
+@app.route('/api/tarea/<int:id>', methods=["GET"])
+def api_tareas_show(id):
+    registro = Tarea.get_by_id(id)
+    if not registro:
+        return jsonify({"error": "404: Tarea no encontrada"}), 404
+    return jsonify(dict(registro))
 
 @app.route("/")
 def index():
@@ -117,5 +133,4 @@ def tareas_filtradas(filtro):
     # Obtenemos todas las tareas desde la base de datos
     filas = Tarea.get_all()
     # Filtramos por nombre conteniendo el filtro (insensible a mayúsculas)
-    tareas_filtradas = [fila["nombre"] for fila in filas if filtro.lower() in fila["nombre"].lower()]
-    return render_template("tareas.html", tarea=tareas_filtradas)
+    return render_template("tareas.html", tarea=filas)
