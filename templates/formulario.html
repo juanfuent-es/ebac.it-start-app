@@ -47,10 +47,11 @@
     <option value="" disabled selected>Selecciona una categoría</option>
     {% if categorias %}
       {% for c in categorias %}
-    <option value="{{ c.id }}">{{ c.nombre }}</option>
+    <option value="{{ c.nombre }}">{{ c.nombre }}</option>
     {% endfor %}
     {% endif %}
   </select>
+  <p><small><i>*Puedes crear una categoría nueva escribiendo el nombre y pulsando Enter</i></small></p>
   <!-- Espaciado -->
   <br>
   <!-- BOTÓN DE ENVÍO -->

@@ -8,13 +8,9 @@ class Categoria:
     @staticmethod
     def create(nombre):
         """Crea una categoría y devuelve su id (int)."""
-        # Validación básica
-        if nombre is None:
+        if nombre == "":
             raise ValueError("El nombre de la categoría es obligatorio")
-        nombre_limpio = str(nombre).strip()
-        if nombre_limpio == "":
-            raise ValueError("El nombre de la categoría es obligatorio")
-        query = execute("INSERT INTO categorias (nombre) VALUES (?)", (nombre_limpio,))
+        query = execute("INSERT INTO categorias (nombre) VALUES (?)", (nombre,))
         print(f" * Categoría creada: {query}")
         return query
 
@@ -27,6 +23,21 @@ class Categoria:
         query = query_one("SELECT id, nombre FROM categorias WHERE id = ?", (categoria_id,))
         print(f" * Categoría: {query}")
         return query
+
+    @staticmethod
+    def get_by_name(nombre):
+        """Devuelve una fila (id, nombre) o None."""
+        return query_one("SELECT id, nombre FROM categorias WHERE nombre = ?", (nombre,))
+
+    @staticmethod
+    def get_or_create(nombre):
+        if nombre == "":
+            raise ValueError("El nombre de la categoría es obligatorio")
+        """Devuelve un id; crea la categoría si no existe. Limpia y valida nombre."""
+        row = Categoria.get_by_name(nombre)
+        if not row:
+            return Categoria.create(nombre)
+        return row["id"]
 
     @staticmethod
     def get_all():

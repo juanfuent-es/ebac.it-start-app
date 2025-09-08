@@ -17,15 +17,25 @@ class Tarea:
         Lanza ValueError con mensajes orientados al usuario si algo no es válido.
         """
         # Validación de nombre
+        if nombre is None:
+            raise ValueError("El nombre de la tarea es obligatorio")
+        nombre = str(nombre).strip()
         if nombre == "":
             raise ValueError("El nombre de la tarea es obligatorio")
 
         # Validación de categoría
-        if not categoria_id_raw or not str(categoria_id_raw).isdigit():
+        if categoria_id_raw is None or str(categoria_id_raw).strip() == "":
             raise ValueError("Debes seleccionar una categoría válida")
-        categoria_id = int(categoria_id_raw)
-        if not Categoria.get_by_id(categoria_id):
-            raise ValueError("La categoría seleccionada no existe")
+        categoria_str = str(categoria_id_raw).strip()
+        if categoria_str.isdigit():
+            categoria_id = int(categoria_str)
+            if not Categoria.get_by_id(categoria_id):
+                raise ValueError("La categoría seleccionada no existe")
+        else:
+            row = Categoria.get_by_name(categoria_str)
+            if not row:
+                raise ValueError("La categoría seleccionada no existe")
+            categoria_id = row["id"] if isinstance(row, dict) else row.id
 
         return nombre, categoria_id
     

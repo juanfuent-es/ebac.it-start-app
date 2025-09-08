@@ -43,11 +43,11 @@ def index():
 
 @app.route("/crear", methods=["GET", "POST"])
 def nueva_tarea():
-    # Verificamos si la petición es POST (envío de formulario)
-    if request.method == "POST":
+    if request.method == "POST": # Verificamos si la petición es POST (envío de formulario)
         nombre = request.form.get("title", "").strip()
-        categoria_id = request.form.get("categoria")
+        categoria = request.form.get("categoria", "").strip()
         try:
+            categoria_id = Categoria.get_or_create(categoria)
             Tarea.create(nombre=nombre, categoria_id=categoria_id)
         except ValueError as err:
             flash(str(err), "danger")
@@ -55,12 +55,8 @@ def nueva_tarea():
         flash("Tarea creada correctamente", "success")
         return redirect("/")
     else:
-        # Si la petición es GET, mostramos el formulario con categorías existentes
-        categorias = Categoria.get_all()  # [(id, nombre), ...]
-        return render_template(
-            "formulario.html",
-            categorias=categorias
-        )
+        categorias = Categoria.get_all()
+        return render_template("formulario.html", categorias=categorias)
 
 @app.route('/tarea/<int:id>')
 def detalle(id): # CONSULTA EL DETALLE DE UNA TAREA ESPECÍFICA
@@ -81,29 +77,22 @@ def toggle_estado(id): # Alterna el estado de la tarea entre 'pendiente' y 'comp
 def editar(id): # EDITA Y ACTUALIZA UNA TAREA EXISTENTE
     tarea = Tarea.get_by_id(id)
     if request.method == "POST":
-        nuevo_nombre = request.form.get("title", "")
-        nueva_categoria_id = request.form.get("categoria")
-        # Validación del nombre
-        if not str(nuevo_nombre).strip():
-            flash("El nombre de la tarea es obligatorio", "danger")
-            return redirect(f"/editar/{id}?nombre={nuevo_nombre}&categoria={nueva_categoria_id or ''}")
-        # Validación de categoría
-        if not nueva_categoria_id or not str(nueva_categoria_id).isdigit():
-            flash("Debes seleccionar una categoría válida", "danger")
-            return redirect(f"/editar/{id}?nombre={nuevo_nombre}&categoria={nueva_categoria_id or ''}")
-        nueva_categoria_id_int = int(nueva_categoria_id)
-        if not Categoria.get_by_id(nueva_categoria_id_int):
-            flash("La categoría seleccionada no existe", "danger")
-            return redirect(f"/editar/{id}?nombre={nuevo_nombre}&categoria={nueva_categoria_id_int}")
+        nombre = request.form.get("title", "")
+        categoria = Categoria.get_or_create(request.form.get("categoria"))
+        try:
+            nombre_ok, categoria_ok = Tarea.validate(nombre, categoria["id"])
+        except ValueError as err:
+            flash(str(err), "danger")
+            return redirect(f"/editar/{id}?nombre={nombre}&categoria={(categoria and categoria['nombre']) or ''}")
         # Actualizamos nombre
-        Tarea.update(id, nuevo_nombre.strip())
+        Tarea.update(id, str(nombre_ok).strip())
         # Movemos de categoría si cambió
-        if nueva_categoria_id_int != tarea["categoria_id"]:
+        if categoria_ok != tarea["categoria_id"]:
             try:
-                Tarea.move_to_categoria(id, nueva_categoria_id_int)
+                Tarea.move_to_categoria(id, categoria_ok)
             except sqlite3.IntegrityError:
                 flash("No se pudo cambiar la categoría por una restricción de integridad.", "danger")
-                return redirect(f"/editar/{id}?nombre={nuevo_nombre}&categoria={nueva_categoria_id_int}")
+                return redirect(f"/editar/{id}")
         flash("Tarea actualizada", "success")
         return redirect(f"/tarea/{id}")
     else:
