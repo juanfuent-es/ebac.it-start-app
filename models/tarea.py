@@ -9,26 +9,45 @@ from .categoria import Categoria
 
 class Tarea:
     """Operaciones básicas sobre la tabla `tareas`."""
+
     @staticmethod
-    def create(nombre, categoria_id, estado="pendiente"):
-        """Crea una tarea y devuelve su id (int).
+    def validate(nombre, categoria_id_raw):
+        """Valida datos de entrada para Tarea y retorna (nombre_limpio, categoria_id).
+
+        Lanza ValueError con mensajes orientados al usuario si algo no es válido.
+        """
+        # Validación de nombre
+        if nombre == "":
+            raise ValueError("El nombre de la tarea es obligatorio")
+
+        # Validación de categoría
+        if not categoria_id_raw or not str(categoria_id_raw).isdigit():
+            raise ValueError("Debes seleccionar una categoría válida")
+        categoria_id = int(categoria_id_raw)
+        if not Categoria.get_by_id(categoria_id):
+            raise ValueError("La categoría seleccionada no existe")
+
+        return nombre, categoria_id
+    
+    @staticmethod
+    def create(nombre="", categoria_id=None, estado="pendiente"):
+        """Valida datos, crea una tarea y devuelve su id (int).
 
         Reglas del esquema:
-        - estado tiene default 'pendiente' (puedes omitirlo si quieres usar ese valor)
-        - categoria_id es NOT NULL (siempre debe existir la categoría)
-        - created_at/updated_at se rellenan automát. con la fecha actual
+        - estado tiene default 'pendiente'
+        - categoria_id es NOT NULL y debe existir
+        - created_at/updated_at se gestionan en DB
         """
-        # Validaciones básicas
-        if nombre is None:
-            raise ValueError("El nombre de la tarea es obligatorio")
-        nombre_limpio = str(nombre).strip()
-        if nombre_limpio == "":
-            raise ValueError("El nombre de la tarea es obligatorio")
-
-        return execute(
-            "INSERT INTO tareas (nombre, estado, categoria_id) VALUES (?, ?, ?)",
-            (nombre_limpio, estado, categoria_id),
-        )
+        # Validación centralizada
+        nombre_ok, categoria_ok = Tarea.validate(nombre, categoria_id)
+        try:
+            return execute(
+                "INSERT INTO tareas (nombre, estado, categoria_id) VALUES (?, ?, ?)",
+                (nombre_ok, estado, categoria_ok),
+            )
+        except Exception as exc:
+            # Normalizamos errores de integridad a ValueError con mensaje de usuario
+            raise ValueError("No se pudo crear la tarea por una restricción de integridad.") from exc
 
     # ------------------------------------------------------------------
     # Leer (SELECT)

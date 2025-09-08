@@ -10,13 +10,15 @@
 # En esta sección importamos dependencias, inicializamos la base
 # de datos y declaramos utilidades de apoyo.
 # Importamos las clases y funciones que necesitamos de Flask
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, flash
+import sqlite3
 from database import init_db
 from models.categoria import Categoria
 from models.tarea import Tarea
 # Creamos una instancia de la aplicación Flask
 # __name__ es una variable especial de Python que contiene el nombre del módulo
 app = Flask(__name__)
+app.secret_key = "dev-secret"  # Necesario para usar mensajes flash
 init_db()
 
 # =============================================================================
@@ -27,67 +29,47 @@ init_db()
 #   - GET  /                        -> Listar todas las tareas registradas
 #   - GET  /crear                   -> Formulario: crear nueva tarea
 #   - POST /crear                   -> Crear una nueva tarea desde formulario web
-#   - GET  /tarea/<id>          -> Consulta el detalle de una tarea específica
-#   - GET  /editar/<id>         -> Edita una tarea existente (vista)
-#   - POST /editar/<id>         -> Actualiza una tarea existente
-#   - GET  /eliminar/<id>       -> Elimina una tarea desde la interfaz
+#   - GET  /tarea/<id>              -> Consulta el detalle de una tarea específica
+#   - GET  /editar/<id>             -> Edita una tarea existente (vista)
+#   - POST /editar/<id>             -> Actualiza una tarea existente
+#   - GET  /eliminar/<id>           -> Elimina una tarea desde la interfaz
 #   - GET  /filtrar/<filtro>        -> Listado filtrado por categoría o estado
 #   - GET  /acerca                  -> Página "Acerca de"
 
 @app.route("/")
 def index():
-    """
-    HOME - Muestra todas las tareas guardadas en la base de datos.
-    """
     registros = Tarea.get_all()
     return render_template("index.html", tareas=registros)
 
 @app.route("/crear", methods=["GET", "POST"])
 def nueva_tarea():
-    """
-    CREA UNA NUEVA TAREA DESDE UN FORMULARIO WEB
-    --------------------------------------------
-    Ruta para crear nuevas tareas.
-    - GET: Muestra el formulario para crear una tarea
-    - POST: Procesa los datos del formulario y guarda la tarea
-    """
     # Verificamos si la petición es POST (envío de formulario)
     if request.method == "POST":
-        # Obtenemos el título de la tarea desde el formulario
-        nombre = request.form.get("title", "")
+        nombre = request.form.get("title", "").strip()
         categoria_id = request.form.get("categoria")
         try:
             Tarea.create(nombre=nombre, categoria_id=categoria_id)
         except ValueError as err:
-            categorias = Categoria.get_all()
-            # Re-render del formulario con mensaje de error y datos previos
-            return render_template(
-                "formulario.html",
-                categorias=categorias,
-                error=str(err),
-                nombre=nombre,
-                categoria_seleccionada=categoria_id,
-            ), 400
+            flash(str(err), "danger")
+            return redirect(f"/crear")
+        flash("Tarea creada correctamente", "success")
         return redirect("/")
     else:
         # Si la petición es GET, mostramos el formulario con categorías existentes
         categorias = Categoria.get_all()  # [(id, nombre), ...]
-        return render_template("formulario.html", categorias=categorias)
+        return render_template(
+            "formulario.html",
+            categorias=categorias
+        )
 
 @app.route('/tarea/<int:id>')
-def detalle(id):
-    """
-    CONSULTA EL DETALLE DE UNA TAREA ESPECÍFICA
-    """
+def detalle(id): # CONSULTA EL DETALLE DE UNA TAREA ESPECÍFICA
     tarea = Tarea.get_by_id(id)
     categoria = Categoria.get_by_id(tarea["categoria_id"])
     return render_template("tarea.html", tarea=tarea, categoria=categoria)
 
 @app.route('/tarea/<int:id>/toggle-estado', methods=["POST"])
-def toggle_estado(id):
-    """
-    Alterna el estado de la tarea entre 'pendiente' y 'completada'.
-    """
+def toggle_estado(id): # Alterna el estado de la tarea entre 'pendiente' y 'completada'
     tarea = Tarea.get_by_id(id)
     if not tarea:
         return redirect("/")
@@ -96,28 +78,46 @@ def toggle_estado(id):
     return redirect(f"/tarea/{id}")
 
 @app.route("/editar/<int:id>", methods=["GET", "POST"])
-def editar(id):
-    """
-    EDITA Y ACTUALIZA UNA TAREA EXISTENTE
-    -------------------------------------
-    Ruta para editar una tarea específica
-    - <int:id>: Convierte el parámetro de la URL en un número entero
-    - GET: Muestra el formulario con la tarea actual
-    - POST: Guarda los cambios de la tarea
-    """
+def editar(id): # EDITA Y ACTUALIZA UNA TAREA EXISTENTE
     tarea = Tarea.get_by_id(id)
     if request.method == "POST":
-        nuevo_nombre = request.form["title"]
+        nuevo_nombre = request.form.get("title", "")
         nueva_categoria_id = request.form.get("categoria")
-        # Actualizamos nombre si cambió
-        Tarea.update(id, nuevo_nombre)
+        # Validación del nombre
+        if not str(nuevo_nombre).strip():
+            flash("El nombre de la tarea es obligatorio", "danger")
+            return redirect(f"/editar/{id}?nombre={nuevo_nombre}&categoria={nueva_categoria_id or ''}")
+        # Validación de categoría
+        if not nueva_categoria_id or not str(nueva_categoria_id).isdigit():
+            flash("Debes seleccionar una categoría válida", "danger")
+            return redirect(f"/editar/{id}?nombre={nuevo_nombre}&categoria={nueva_categoria_id or ''}")
+        nueva_categoria_id_int = int(nueva_categoria_id)
+        if not Categoria.get_by_id(nueva_categoria_id_int):
+            flash("La categoría seleccionada no existe", "danger")
+            return redirect(f"/editar/{id}?nombre={nuevo_nombre}&categoria={nueva_categoria_id_int}")
+        # Actualizamos nombre
+        Tarea.update(id, nuevo_nombre.strip())
         # Movemos de categoría si cambió
-        if nueva_categoria_id != tarea["categoria_id"]:
-            Tarea.move_to_categoria(id, nueva_categoria_id)
+        if nueva_categoria_id_int != tarea["categoria_id"]:
+            try:
+                Tarea.move_to_categoria(id, nueva_categoria_id_int)
+            except sqlite3.IntegrityError:
+                flash("No se pudo cambiar la categoría por una restricción de integridad.", "danger")
+                return redirect(f"/editar/{id}?nombre={nuevo_nombre}&categoria={nueva_categoria_id_int}")
+        flash("Tarea actualizada", "success")
         return redirect(f"/tarea/{id}")
     else:
         # Pasamos datos necesarios: nombre, índice, categorías y categoría actual
         categorias = Categoria.get_all()
+        # Posible prefill desde query params
+        nombre_q = request.args.get("nombre")
+        categoria_q = request.args.get("categoria")
+        if nombre_q is not None:
+            tarea = dict(tarea)
+            tarea["nombre"] = nombre_q
+        if categoria_q is not None:
+            tarea = dict(tarea)
+            tarea["categoria_id"] = categoria_q
         return render_template(
             "editar.html",
             tarea=tarea,
@@ -125,13 +125,7 @@ def editar(id):
         )
 
 @app.route("/eliminar/<int:id>")
-def eliminar(id):
-    """
-    ELIMINA UNA TAREA DESDE LA INTERFAZ
-    -----------------------------------
-    Ruta para eliminar una tarea específica
-    Elimina la tarea del índice especificado y redirige a la lista
-    """
+def eliminar(id): # ELIMINA UNA TAREA DESDE LA INTERFAZ
     tarea = Tarea.get_by_id(id)
     if tarea:
         Tarea.delete(id)
@@ -139,20 +133,10 @@ def eliminar(id):
 
 @app.route('/acerca')
 def acerca_de():
-    """
-    Ruta para la página "Acerca de"
-    Muestra información sobre la aplicación
-    """
     return render_template("acerca.html")
 
 @app.route('/filtrar/<filtro>')
 def tareas_filtradas(filtro):
-    """
-    FILTRAR TAREAS POR NOMBRE
-    -------------------------
-    Ruta para filtrar tareas
-    El parámetro <filtro> en la URL se pasa como argumento a la función
-    """
     # Obtenemos todas las tareas desde la base de datos
     filas = Tarea.get_all()
     # Filtramos por nombre conteniendo el filtro (insensible a mayúsculas)
