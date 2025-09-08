@@ -48,4 +48,30 @@
     </div>
   </div>
 </section>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('form[action$="/toggle-estado"][method="post"]');
+    if (!form) return;
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      // Inferir id desde la action
+      const action = form.getAttribute('action');
+      const parts = action.split('/');
+      const id = parts[2];
+      // Obtener estado actual desde badge si está disponible
+      const badge = document.querySelector('#tarea .badge');
+      const estadoActual = badge ? badge.textContent.trim().toLowerCase() : null;
+      const nuevoEstado = estadoActual === 'completada' ? 'pendiente' : 'completada';
+      try {
+        await apiFetch(`/api/tarea/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ estado: nuevoEstado })
+        });
+        window.location.reload();
+      } catch (err) {
+        showFlash(err.message || 'No se pudo cambiar el estado', 'danger');
+      }
+    });
+  });
+</script>
 {% endblock %}

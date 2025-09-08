@@ -36,21 +36,66 @@ init_db()
 #   - GET  /filtrar/<filtro>        -> Listado filtrado por categoría o estado
 #   - GET  /acerca                  -> Página "Acerca de"
 
-
 # =============================================================================
-# API JSON - 'Endpoints' para Tarea (index y show)
+# API JSON - 'Endpoints' para Tarea (CRUD)
 # =============================================================================
 @app.route('/api/tareas', methods=["GET"])
 def api_tareas_index():
     registros = Tarea.get_all()
-    return jsonify([dict(fila) for fila in registros])
+    return jsonify([{"id": fila["id"], "nombre": fila["nombre"]} for fila in registros])
 
-@app.route('/api/tarea/<int:id>', methods=["GET"])
+@app.route('/api/tarea/<int:id>', methods=["GET", "PUT", "PATCH", "DELETE"])
 def api_tareas_show(id):
     registro = Tarea.get_by_id(id)
     if not registro:
         return jsonify({"error": "404: Tarea no encontrada"}), 404
-    return jsonify(dict(registro))
+    if request.method == "GET":
+        return jsonify(dict(registro))
+    if request.method == "DELETE":
+        Tarea.delete(id)
+        return ("", 204)
+    if not request.is_json:
+        return jsonify({"error": "Content-Type debe ser application/json"}), 400
+    data = request.get_json(silent=True) or {}
+
+    nombre = str(data.get("nombre", "")).strip()
+    categoria = str(data.get("categoria", "")).strip()
+
+    if nombre == "":
+        return jsonify({"error": "El nombre de la tarea es obligatorio"}), 400
+    if categoria == "":
+        return jsonify({"error": "Debes proporcionar una 'categoria' válida"}), 400
+
+    try:
+        categoria_id = Categoria.get_or_create(categoria)
+        Tarea.update(id, nombre)
+        Tarea.move_to_categoria(id, categoria_id)
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
+
+    actualizado = Tarea.get_by_id(id)
+    return jsonify(dict(actualizado))
+
+@app.route('/api/tareas', methods=["POST"])
+def api_tareas_create():
+    if not request.is_json:
+        return jsonify({"error": "Content-Type debe ser application/json"}), 400
+    data = request.get_json(silent=True) or {}
+
+    nombre = str(data.get("nombre", "")).strip()
+    if nombre == "":
+        return jsonify({"error": "El nombre de la tarea es obligatorio"}), 400
+    categoria = str(data.get("categoria", "")).strip()
+    if categoria == "":
+        return jsonify({"error": "Debes proporcionar una 'categoria' válida"}), 400
+    try:
+        categoria_id = Categoria.get_or_create(categoria)
+        new_id = Tarea.create(nombre=nombre, categoria_id=categoria_id)
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
+
+    nueva = Tarea.get_by_id(new_id)
+    return jsonify(dict(nueva)), 201
 
 @app.route("/")
 def index():

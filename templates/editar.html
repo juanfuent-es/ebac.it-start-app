@@ -21,7 +21,7 @@
 <!-- FORMULARIO HTML -->
 <!-- action="/crear" = URL donde se envían los datos -->
 <!-- method="post" = Método HTTP para enviar datos de forma segura -->
-<form action="/editar/{{ tarea.id }}" method="post">
+<form action="/editar/{{ tarea.id }}" method="post" id="editar-tarea-form" data-id="{{ tarea.id }}">
   <!-- ETIQUETA DEL CAMPO -->
   <!-- for="nombre" = Asocia la etiqueta con el campo de entrada -->
   <!-- form-label = Clase de Bootstrap para estilizar etiquetas -->
@@ -77,6 +77,24 @@
         placeholder: 'Selecciona o crea una categoría'
       });
     }
+    // Interceptar formulario de editar tarea (action="/editar/:id") para usar PATCH /api/tarea/:id
+    const form = document.querySelector('#editar-tarea-form');
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      
+      const id = form.getAttribute('data-id');
+      const nombre = document.querySelector('#nombre').value.trim();
+      const categoria = document.querySelector('#categoria').value.trim();
+      try {
+        await apiFetch(`/api/tarea/${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ nombre, categoria })
+        });
+        window.location.href = `/tarea/${id}`;
+      } catch (err) {
+        showFlash(err.message || 'No se pudo actualizar la tarea', 'danger');
+      }
+    });
   });
 </script>
 {% endblock %}

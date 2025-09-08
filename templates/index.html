@@ -64,7 +64,7 @@
         <!-- Botón Eliminar -->
         <!-- btn-outline-danger = Botón con borde rojo -->
         <!-- onclick="..." = JavaScript que pide confirmación antes de eliminar -->
-        <a href="/eliminar/{{ tarea.id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('¿Estás seguro de que quieres eliminar esta tarea?')">
+        <a href="/eliminar/{{ tarea.id }}" class="btn btn-sm btn-outline-danger delete-tarea" data-id="{{ tarea.id }}">
           <i class="bi bi-trash me-1"></i>
           Eliminar
         </a>
@@ -80,4 +80,22 @@
   </div>
   {% endif %}
 </section>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.delete-tarea').forEach((link) => {
+      link.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        const id = link.getAttribute('data-id');
+        const ok = window.confirm('¿Estás seguro de que quieres eliminar esta tarea?');
+        if (!ok) return;
+        try {
+          await apiFetch(`/api/tarea/${id}`, { method: 'DELETE' });
+          window.location.href = '/';
+        } catch (err) {
+          showFlash(err.message || 'No se pudo eliminar la tarea', 'danger');
+        }
+      });
+    });
+  });
+</script>
 {% endblock %}

@@ -24,7 +24,7 @@
 <!-- FORMULARIO HTML -->
 <!-- action="/crear" = URL donde se envían los datos -->
 <!-- method="post" = Método HTTP para enviar datos de forma segura -->
-<form action="/crear" method="post">
+<form action="/crear" method="post" id="crear-tarea-form">
   <!-- ETIQUETA DEL CAMPO -->
   <!-- for="nombre" = Asocia la etiqueta con el campo de entrada -->
   <!-- form-label = Clase de Bootstrap para estilizar etiquetas -->
@@ -80,6 +80,22 @@
         placeholder: 'Selecciona o crea una categoría'
       });
     }
+
+    const form = document.querySelector('#crear-tarea-form');
+    form.addEventListener('submit', async (evt) => {
+      evt.preventDefault();
+      const nombre = document.querySelector('#nombre').value.trim();
+      const categoria = document.querySelector('#categoria').value.trim();
+      try {
+        await apiFetch('/api/tareas', {
+          method: 'POST',
+          body: JSON.stringify({ nombre, categoria })
+        });
+        window.location.href = '/';
+      } catch (err) {
+        showFlash(err.message || 'No se pudo crear la tarea', 'danger');
+      }
+    });
   });
 </script>
 {% endblock %}
