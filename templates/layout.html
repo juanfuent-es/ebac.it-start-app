@@ -25,19 +25,21 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
   </head>
   <body>
-    <!-- CABECERA DE LA APLICACIÓN -->
-    <header class="container">
-      <!-- Barra de navegación usando Bootstrap -->
-      <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <!--
+    Barra de navegación usando Bootstrap 
+    @see: https://getbootstrap.com/docs/5.3/components/navbar/
+    -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container">
         <!-- Enlaces de navegación -->
         <!-- href="/" = Ruta raíz de la aplicación -->
-        <a href="/">Inicio</a>
-        <!-- href="/tareas" = Ruta para ver las tareas -->
-        <a href="/tareas">Tareas</a>
-        <!-- href="/acerca-de" = Ruta para la página "Acerca de" -->
-        <a href="/acerca-de">Acerca de</a>
-      </nav>
-    </header>
+        <a href="/" class="navbar-brand">
+          <img src="/static/rutina.py-logo.svg" alt="Logo Rutina.py" width="32" height="32">
+        </a>
+        <!-- href="/acerca" = Ruta para la página "Acerca de" -->
+        <a href="/acerca" class="nav-link">Acerca de</a>
+      </div>
+    </nav>
     <!-- Espaciado -->
     <br>
     <!-- CONTENIDO PRINCIPAL -->

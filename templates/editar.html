@@ -21,7 +21,7 @@
 <!-- FORMULARIO HTML -->
 <!-- action="/crear" = URL donde se envían los datos -->
 <!-- method="post" = Método HTTP para enviar datos de forma segura -->
-<form action="/crear" method="post">
+<form action="/editar/{{ tarea.id }}" method="post">
   <!-- ETIQUETA DEL CAMPO -->
   <!-- for="nombre" = Asocia la etiqueta con el campo de entrada -->
   <!-- form-label = Clase de Bootstrap para estilizar etiquetas -->
@@ -31,7 +31,7 @@
   <!-- class="form-control" = Estilo de Bootstrap para campos de entrada -->
   <!-- type="text" = Tipo de entrada (texto) -->
   <!-- id="nombre" = Identificador único del campo (se asocia con for="nombre") -->
-  <input name="title" class="form-control" type="text" id="nombre">
+  <input name="title" class="form-control" value="{{ tarea.nombre }}" type="text" id="nombre">
   <!-- Selección de categoría -->
   <!-- Soporta elegir una categoría existente o crear una nueva escribiendo el nombre -->
   <br>
@@ -42,10 +42,10 @@
     class="form-select"
     placeholder="Selecciona o crea una categoría"
   >
-    <option value="">Selecciona una categoría</option>
+    <option value="" disabled>Selecciona una categoría</option>
     {% if categorias %}
-      {% for c in categorias %}
-    <option value="{{ c.id }}">{{ c.nombre }}</option>
+      {% for cat in categorias %}
+    <option value="{{ cat.id }}" {% if cat.id == tarea.categoria_id %}selected{% endif %}>{{ cat.nombre }}</option>
     {% endfor %}
     {% endif %}
   </select>

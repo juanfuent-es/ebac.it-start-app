@@ -1,0 +1,39 @@
+<!-- =============================================================================
+     TEMPLATE: DETALLE DE TAREA
+     ============================================================================= -->
+{% extends "layout.html" %}
+{% block title %}Detalle de Tarea{% endblock %}
+{% block content %}
+<section id="tarea" class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-lg-8">
+      <div class="card shadow-sm">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <h2 class="h5 mb-0">{{ tarea.nombre }}</h2>
+          <span class="badge {{ 'bg-success' if tarea.estado == 'completada' else 'bg-secondary' }}">{{ tarea.estado|title }}</span>
+        </div>
+        <div class="card-body">
+          <dl class="row mb-0">
+            <dt class="col-sm-4">Categoría</dt>
+            <dd class="col-sm-8">{{ categoria.nombre }}</dd>
+            <dt class="col-sm-4">Creada</dt>
+            <dd class="col-sm-8"><small class="text-muted">{{ tarea.created_at }}</small></dd>
+            <dt class="col-sm-4">Actualizada</dt>
+            <dd class="col-sm-8"><small class="text-muted">{{ tarea.updated_at }}</small></dd>
+          </dl>
+        </div>
+        <div class="card-footer d-flex gap-2">
+          <form action="/tarea/{{ tarea.id }}/toggle-estado" method="post" class="m-0 p-0">
+            {% set es_completada = tarea.estado == 'completada' %}
+            <button type="submit" class="btn {{ 'btn-warning' if es_completada else 'btn-success' }}">
+              {{ 'Marcar como pendiente' if es_completada else 'Marcar como completada' }}
+            </button>
+          </form>
+          <a href="/editar/{{ tarea.id }}" class="btn btn-primary">Editar</a>
+          <a href="/" class="btn btn-outline-secondary">Volver</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
