@@ -10,7 +10,7 @@
 # En esta sección importamos dependencias, inicializamos la base
 # de datos y declaramos utilidades de apoyo.
 # Importamos las clases y funciones que necesitamos de Flask
-from flask import Flask, render_template, request, redirect, flash
+from flask import Flask, render_template, request, redirect, flash, abort
 import sqlite3
 from database import init_db
 from models.categoria import Categoria
@@ -61,6 +61,8 @@ def nueva_tarea():
 @app.route('/tarea/<int:id>')
 def detalle(id): # CONSULTA EL DETALLE DE UNA TAREA ESPECÍFICA
     tarea = Tarea.get_by_id(id)
+    if not tarea:
+        return render_template("404.html"), 404
     categoria = Categoria.get_by_id(tarea["categoria_id"])
     return render_template("tarea.html", tarea=tarea, categoria=categoria)
 
@@ -68,7 +70,7 @@ def detalle(id): # CONSULTA EL DETALLE DE UNA TAREA ESPECÍFICA
 def toggle_estado(id): # Alterna el estado de la tarea entre 'pendiente' y 'completada'
     tarea = Tarea.get_by_id(id)
     if not tarea:
-        return redirect("/")
+        return render_template("404.html"), 404
     nuevo_estado = "pendiente" if tarea["estado"] == "completada" else "completada"
     Tarea.set_estado(id, nuevo_estado)
     return redirect(f"/tarea/{id}")
@@ -76,43 +78,24 @@ def toggle_estado(id): # Alterna el estado de la tarea entre 'pendiente' y 'comp
 @app.route("/editar/<int:id>", methods=["GET", "POST"])
 def editar(id): # EDITA Y ACTUALIZA UNA TAREA EXISTENTE
     tarea = Tarea.get_by_id(id)
+    if not tarea:
+        abort(404)
+        return render_template("404.html"), 404
     if request.method == "POST":
-        nombre = request.form.get("title", "")
-        categoria = request.form.get("categoria", "")
+        nombre = request.form.get("title", "").strip()
+        categoria = request.form.get("categoria", "").strip()
         try:
             categoria_id = Categoria.get_or_create(categoria)
-            nombre_ok, categoria_ok = Tarea.validate(nombre, categoria_id)
+            Tarea.update(id, nombre)
+            Tarea.move_to_categoria(id, categoria_id)
         except ValueError as err:
             flash(str(err), "danger")
-            return redirect(f"/editar/{id}?nombre={nombre}&categoria={categoria}")
-        # Actualizamos nombre
-        Tarea.update(id, str(nombre_ok).strip())
-        # Movemos de categoría si cambió
-        if categoria_ok != tarea["categoria_id"]:
-            try:
-                Tarea.move_to_categoria(id, categoria_ok)
-            except sqlite3.IntegrityError:
-                flash("No se pudo cambiar la categoría por una restricción de integridad.", "danger")
-                return redirect(f"/editar/{id}")
+            return redirect(f"/editar/{id}")
         flash("Tarea actualizada", "success")
         return redirect(f"/tarea/{id}")
     else:
-        # Pasamos datos necesarios: nombre, índice, categorías y categoría actual
         categorias = Categoria.get_all()
-        # Posible prefill desde query params
-        nombre_q = request.args.get("nombre")
-        categoria_q = request.args.get("categoria")
-        if nombre_q is not None:
-            tarea = dict(tarea)
-            tarea["nombre"] = nombre_q
-        if categoria_q is not None:
-            tarea = dict(tarea)
-            tarea["categoria_id"] = categoria_q
-        return render_template(
-            "editar.html",
-            tarea=tarea,
-            categorias=categorias
-        )
+        return render_template("editar.html", tarea=tarea, categorias=categorias)
 
 @app.route("/eliminar/<int:id>")
 def eliminar(id): # ELIMINA UNA TAREA DESDE LA INTERFAZ
@@ -120,6 +103,10 @@ def eliminar(id): # ELIMINA UNA TAREA DESDE LA INTERFAZ
     if tarea:
         Tarea.delete(id)
     return redirect("/")
+
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template("404.html"), 404
 
 @app.route('/acerca')
 def acerca_de():
