@@ -18,9 +18,16 @@ class Tarea:
         - categoria_id es NOT NULL (siempre debe existir la categoría)
         - created_at/updated_at se rellenan automát. con la fecha actual
         """
+        # Validaciones básicas
+        if nombre is None:
+            raise ValueError("El nombre de la tarea es obligatorio")
+        nombre_limpio = str(nombre).strip()
+        if nombre_limpio == "":
+            raise ValueError("El nombre de la tarea es obligatorio")
+
         return execute(
             "INSERT INTO tareas (nombre, estado, categoria_id) VALUES (?, ?, ?)",
-            (nombre, estado, categoria_id),
+            (nombre_limpio, estado, categoria_id),
         )
 
     # ------------------------------------------------------------------

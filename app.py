@@ -54,9 +54,20 @@ def nueva_tarea():
     # Verificamos si la petición es POST (envío de formulario)
     if request.method == "POST":
         # Obtenemos el título de la tarea desde el formulario
-        nombre = request.form["title"]
-        categoria_id = request.form["categoria"]
-        Tarea.create(nombre=nombre, categoria_id=categoria_id)
+        nombre = request.form.get("title", "")
+        categoria_id = request.form.get("categoria")
+        try:
+            Tarea.create(nombre=nombre, categoria_id=categoria_id)
+        except ValueError as err:
+            categorias = Categoria.get_all()
+            # Re-render del formulario con mensaje de error y datos previos
+            return render_template(
+                "formulario.html",
+                categorias=categorias,
+                error=str(err),
+                nombre=nombre,
+                categoria_seleccionada=categoria_id,
+            ), 400
         return redirect("/")
     else:
         # Si la petición es GET, mostramos el formulario con categorías existentes

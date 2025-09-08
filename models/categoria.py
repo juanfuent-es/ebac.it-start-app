@@ -8,7 +8,13 @@ class Categoria:
     @staticmethod
     def create(nombre):
         """Crea una categoría y devuelve su id (int)."""
-        query = execute("INSERT INTO categorias (nombre) VALUES (?)", (nombre,))
+        # Validación básica
+        if nombre is None:
+            raise ValueError("El nombre de la categoría es obligatorio")
+        nombre_limpio = str(nombre).strip()
+        if nombre_limpio == "":
+            raise ValueError("El nombre de la categoría es obligatorio")
+        query = execute("INSERT INTO categorias (nombre) VALUES (?)", (nombre_limpio,))
         print(f" * Categoría creada: {query}")
         return query
 
