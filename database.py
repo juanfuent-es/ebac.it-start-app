@@ -8,6 +8,7 @@ def connect_db():
     Conecta a la base de datos
     """
     conn = sqlite3.connect(DATABASE_NAME) # Conecta a la base de datos
+    conn.row_factory = sqlite3.Row  # Devuelve filas tipo Row: acceso por índice y por llave
     conn.execute("PRAGMA foreign_keys = ON") # Activa el modo de clave foránea
     # print(" * Conectado a la base de datos")
     return conn

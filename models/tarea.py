@@ -9,9 +9,6 @@ from .categoria import Categoria
 
 class Tarea:
     """Operaciones básicas sobre la tabla `tareas`."""
-    # ------------------------------------------------------------------
-    # Crear
-    # ------------------------------------------------------------------
     @staticmethod
     def create(nombre, categoria_id, estado="pendiente"):
         """Crea una tarea y devuelve su id (int).
@@ -57,7 +54,7 @@ class Tarea:
 
     @staticmethod
     def set_estado(tarea_id, nuevo_estado):
-        """Actualiza el estado (pendiente | en progreso | completada) y `updated_at`."""
+        """Actualiza el estado (pendiente | completada) y `updated_at`."""
         execute(
             "UPDATE tareas SET estado = ?, updated_at = datetime('now','localtime') WHERE id = ?",
             (nuevo_estado, tarea_id),

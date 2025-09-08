@@ -5,171 +5,145 @@
 # Flask es un framework web ligero para Python que nos permite crear
 # aplicaciones web de forma sencilla
 
+# PREPARA TUS RUTAS Y CONECTA TU BASE DE DATOS
+# --------------------------------------------
+# En esta sección importamos dependencias, inicializamos la base
+# de datos y declaramos utilidades de apoyo.
 # Importamos las clases y funciones que necesitamos de Flask
-from flask import Flask, render_template, request, redirect, make_response
-import os
+from flask import Flask, render_template, request, redirect
 from database import init_db
-
-init_db()
-
+from models.categoria import Categoria
+from models.tarea import Tarea
 # Creamos una instancia de la aplicación Flask
 # __name__ es una variable especial de Python que contiene el nombre del módulo
 app = Flask(__name__)
+init_db()
+
 # =============================================================================
-# DEFINICIÓN DE RUTAS (ROUTES)
+# ESQUEMATIZA TUS RUTAS CRUD - Crear, Leer, Actualizar, Eliminar
 # =============================================================================
-# Las rutas son las URLs que los usuarios pueden visitar en nuestro sitio web
-# Cada ruta está asociada a una función que se ejecuta cuando se visita esa URL
+# Las rutas son las URLs que los usuarios pueden visitar en nuestro sitio web.
+# Esquema general del CRUD:
+#   - GET  /                        -> Listar todas las tareas registradas
+#   - GET  /crear                   -> Formulario: crear nueva tarea
+#   - POST /crear                   -> Crear una nueva tarea desde formulario web
+#   - GET  /tarea/<id>          -> Consulta el detalle de una tarea específica
+#   - GET  /editar/<id>         -> Edita una tarea existente (vista)
+#   - POST /editar/<id>         -> Actualiza una tarea existente
+#   - GET  /eliminar/<id>       -> Elimina una tarea desde la interfaz
+#   - GET  /filtrar/<filtro>        -> Listado filtrado por categoría o estado
+#   - GET  /acerca                  -> Página "Acerca de"
 
 @app.route("/")
 def index():
     """
-    Ruta principal de la aplicación (página de inicio)
-    Cuando alguien visita http://localhost:5000/ se ejecuta esta función
+    HOME - Muestra todas las tareas guardadas en la base de datos.
     """
-    # render_template() busca el archivo HTML en la carpeta 'templates'
-    # y lo devuelve como respuesta al navegador
-    return render_template("index.html")
+    registros = Tarea.get_all()
+    return render_template("index.html", tareas=registros)
 
-@app.route("/nueva-tarea", methods=["GET", "POST"])
+@app.route("/crear", methods=["GET", "POST"])
 def nueva_tarea():
     """
-    Ruta para crear nuevas tareas
+    CREA UNA NUEVA TAREA DESDE UN FORMULARIO WEB
+    --------------------------------------------
+    Ruta para crear nuevas tareas.
     - GET: Muestra el formulario para crear una tarea
     - POST: Procesa los datos del formulario y guarda la tarea
     """
     # Verificamos si la petición es POST (envío de formulario)
     if request.method == "POST":
         # Obtenemos el título de la tarea desde el formulario
-        # request.form es un diccionario que contiene los datos enviados
         nombre = request.form["title"]
-        
-        # OBTENEMOS LAS TAREAS EXISTENTES DESDE LAS COOKIES
-        # Las cookies son pequeños archivos que se guardan en el navegador del usuario
-        # get() devuelve el valor de la cookie o una cadena vacía si no existe
-        tareas = request.cookies.get("tareas", "")
-        
-        # CONVERTIMOS LA CADENA DE TAREAS EN UNA LISTA
-        # Ejemplo: "Barrer,Limpiar,Estudiar" -> ["Barrer", "Limpiar", "Estudiar"]
-        # Si no hay tareas, creamos una lista vacía
-        lista = tareas.split(",") if tareas else []
-        
-        # AGREGAMOS LA NUEVA TAREA A LA LISTA
-        lista.append(nombre)
-        
-        # CREAMOS UNA RESPUESTA DE REDIRECCIÓN
-        # make_response() nos permite crear una respuesta personalizada
-        # redirect() redirige al usuario a otra página
-        response = make_response(redirect("/tareas"))
-        
-        # GUARDAMOS LA LISTA ACTUALIZADA EN LAS COOKIES
-        # join() convierte la lista en una cadena separada por comas
-        # set_cookie() guarda la información en el navegador del usuario
-        response.set_cookie("tareas", ",".join(lista))
-        
-        return response
+        categoria_id = request.form["categoria"]
+        Tarea.create(nombre=nombre, categoria_id=categoria_id)
+        return redirect("/")
     else:
-        # Si la petición es GET, mostramos el formulario
-        return render_template("formulario.html")
+        # Si la petición es GET, mostramos el formulario con categorías existentes
+        categorias = Categoria.get_all()  # [(id, nombre), ...]
+        return render_template("formulario.html", categorias=categorias)
 
-@app.route("/tareas")
-def mostrar_tareas():
+@app.route('/tarea/<int:id>')
+def detalle(id):
     """
-    Ruta para mostrar todas las tareas guardadas
-    Lee las tareas desde las cookies y las muestra en una página
+    CONSULTA EL DETALLE DE UNA TAREA ESPECÍFICA
     """
-    # Obtenemos las tareas desde las cookies
-    tareas = request.cookies.get("tareas", "")
-    
-    # Convertimos la cadena en una lista
-    lista_tareas = tareas.split(",") if tareas else []
-    
-    # Pasamos la lista de tareas al template para mostrarlas
-    # El segundo parámetro (tareas=lista_tareas) hace que la variable
-    # 'tareas' esté disponible en el template HTML
-    return render_template("tareas.html", tareas=lista_tareas)
+    tarea = Tarea.get_by_id(id)
+    categoria = Categoria.get_by_id(tarea["categoria_id"])
+    return render_template("tarea.html", tarea=tarea, categoria=categoria)
 
-@app.route('/acerca-de')
+@app.route('/tarea/<int:id>/toggle-estado', methods=["POST"])
+def toggle_estado(id):
+    """
+    Alterna el estado de la tarea entre 'pendiente' y 'completada'.
+    """
+    tarea = Tarea.get_by_id(id)
+    if not tarea:
+        return redirect("/")
+    nuevo_estado = "pendiente" if tarea["estado"] == "completada" else "completada"
+    Tarea.set_estado(id, nuevo_estado)
+    return redirect(f"/tarea/{id}")
+
+@app.route("/editar/<int:id>", methods=["GET", "POST"])
+def editar(id):
+    """
+    EDITA Y ACTUALIZA UNA TAREA EXISTENTE
+    -------------------------------------
+    Ruta para editar una tarea específica
+    - <int:id>: Convierte el parámetro de la URL en un número entero
+    - GET: Muestra el formulario con la tarea actual
+    - POST: Guarda los cambios de la tarea
+    """
+    tarea = Tarea.get_by_id(id)
+    if request.method == "POST":
+        nuevo_nombre = request.form["title"]
+        nueva_categoria_id = request.form.get("categoria")
+        # Actualizamos nombre si cambió
+        Tarea.update(id, nuevo_nombre)
+        # Movemos de categoría si cambió
+        if nueva_categoria_id != tarea["categoria_id"]:
+            Tarea.move_to_categoria(id, nueva_categoria_id)
+        return redirect(f"/tarea/{id}")
+    else:
+        # Pasamos datos necesarios: nombre, índice, categorías y categoría actual
+        categorias = Categoria.get_all()
+        return render_template(
+            "editar.html",
+            tarea=tarea,
+            categorias=categorias
+        )
+
+@app.route("/eliminar/<int:id>")
+def eliminar(id):
+    """
+    ELIMINA UNA TAREA DESDE LA INTERFAZ
+    -----------------------------------
+    Ruta para eliminar una tarea específica
+    Elimina la tarea del índice especificado y redirige a la lista
+    """
+    tarea = Tarea.get_by_id(id)
+    if tarea:
+        Tarea.delete(id)
+    return redirect("/")
+
+@app.route('/acerca')
 def acerca_de():
     """
     Ruta para la página "Acerca de"
     Muestra información sobre la aplicación
     """
-    return render_template("acerca-de.html")
+    return render_template("acerca.html")
 
-@app.route('/filtrar-tareas/<filtro>')
+@app.route('/filtrar/<filtro>')
 def tareas_filtradas(filtro):
     """
+    FILTRAR TAREAS POR NOMBRE
+    -------------------------
     Ruta para filtrar tareas
     El parámetro <filtro> en la URL se pasa como argumento a la función
     """
-    # Obtenemos todas las tareas desde las cookies
-    tareas = request.cookies.get("tareas", "")
-    lista_tareas = tareas.split(",") if tareas else []
-    
-    # Filtramos las tareas que contengan el texto del filtro
-    # Convertimos tanto la tarea como el filtro a minúsculas para búsqueda insensible a mayúsculas
-    tareas_filtradas = [tarea for tarea in lista_tareas if filtro.lower() in tarea.lower()]
-    
-    # Pasamos las tareas filtradas al template
-    return render_template("tareas.html", tareas=tareas_filtradas)
-
-@app.route("/editar-tarea/<int:indice>", methods=["GET", "POST"])
-def editar_tarea(indice):
-    """
-    Ruta para editar una tarea específica
-    - <int:indice>: Convierte el parámetro de la URL en un número entero
-    - GET: Muestra el formulario con la tarea actual
-    - POST: Guarda los cambios de la tarea
-    """
-    # Obtenemos la lista actual de tareas
-    tareas = request.cookies.get("tareas", "")
-    lista_tareas = tareas.split(",") if tareas else []
-    
-    # VERIFICACIÓN DE SEGURIDAD
-    # Nos aseguramos de que el índice sea válido
-    if indice >= len(lista_tareas):
-        return redirect("/tareas")
-    
-    if request.method == "POST":
-        # Procesamos el formulario de edición
-        nuevo_nombre = request.form["title"]
-        
-        # ACTUALIZAMOS LA TAREA EN LA LISTA
-        lista_tareas[indice] = nuevo_nombre
-        
-        # Guardamos la lista actualizada en las cookies
-        response = make_response(redirect("/tareas"))
-        response.set_cookie("tareas", ",".join(lista_tareas))
-        return response
-    else:
-        # Mostramos el formulario de edición
-        tarea_actual = lista_tareas[indice]
-        
-        # Pasamos tanto la tarea como el índice al template
-        # para que el formulario sepa qué tarea está editando
-        return render_template("editar_tarea.html", tarea=tarea_actual, indice=indice)
-
-@app.route("/eliminar-tarea/<int:indice>")
-def eliminar_tarea(indice):
-    """
-    Ruta para eliminar una tarea específica
-    Elimina la tarea del índice especificado y redirige a la lista
-    """
-    # Obtenemos la lista actual de tareas
-    tareas = request.cookies.get("tareas", "")
-    lista_tareas = tareas.split(",") if tareas else []
-    
-    # VERIFICACIÓN DE SEGURIDAD
-    # Solo eliminamos si el índice es válido
-    if indice < len(lista_tareas):
-        # pop() elimina y devuelve el elemento en el índice especificado
-        lista_tareas.pop(indice)
-        
-        # Guardamos la lista actualizada en las cookies
-        response = make_response(redirect("/tareas"))
-        response.set_cookie("tareas", ",".join(lista_tareas))
-        return response
-    
-    # Si el índice no es válido, redirigimos a la lista de tareas
-    return redirect("/tareas")
+    # Obtenemos todas las tareas desde la base de datos
+    filas = Tarea.get_all()
+    # Filtramos por nombre conteniendo el filtro (insensible a mayúsculas)
+    tareas_filtradas = [fila["nombre"] for fila in filas if filtro.lower() in fila["nombre"].lower()]
+    return render_template("tareas.html", tarea=tareas_filtradas)
