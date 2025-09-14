@@ -49,18 +49,26 @@ def create_table_tareas(conn):
     Columnas:
         - id (INTEGER PRIMARY KEY AUTOINCREMENT): Identificador único de la tarea
         - nombre (TEXT NOT NULL): Nombre de la tarea
-        - estado (TEXT NOT NULL): Estado de la tarea (pendiente, en progreso, completada)
-        - categoria_id (INTEGER): Identificador de la categoría de la tarea (opcional)
         - created_at (TEXT): Fecha y hora de creación de la tarea
+        - fecha_limite (TEXT): Fecha límite para completar la tarea
+        - prioridad (TEXT): Prioridad de la tarea (baja, media, alta)
+        - estado (TEXT NOT NULL): Estado de la tarea (pendiente, en progreso, completada)
+        - tiempo_estimado (INTEGER): Tiempo estimado en minutos
+        - completed_at (TEXT): Fecha y hora de completado de la tarea
+        - categoria_id (INTEGER): Identificador de la categoría de la tarea
         - updated_at (TEXT): Fecha y hora de actualización de la tarea
     """
     conn.execute("""
         CREATE TABLE IF NOT EXISTS tareas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             nombre TEXT NOT NULL,
-            estado TEXT NOT NULL DEFAULT 'pendiente',
-            categoria_id INTEGER NOT NULL,
             created_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+            fecha_limite TEXT,
+            prioridad TEXT DEFAULT 'media',
+            estado TEXT NOT NULL DEFAULT 'pendiente',
+            tiempo_estimado INTEGER,
+            completed_at TEXT,
+            categoria_id INTEGER NOT NULL,
             updated_at TEXT NOT NULL DEFAULT (datetime('now','localtime')),
             FOREIGN KEY (categoria_id) REFERENCES categorias(id)
                 ON UPDATE CASCADE

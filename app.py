@@ -42,7 +42,17 @@ init_db()
 @app.route('/api/tareas', methods=["GET"])
 def api_tareas_index():
     registros = Tarea.get_all()
-    return jsonify([{"id": fila["id"], "nombre": fila["nombre"]} for fila in registros])
+    return jsonify([{
+        "id": fila["id"], 
+        "nombre": fila["nombre"],
+        "created_at": fila["created_at"],
+        "fecha_limite": fila["fecha_limite"],
+        "prioridad": fila["prioridad"],
+        "estado": fila["estado"],
+        "tiempo_estimado": fila["tiempo_estimado"],
+        "completed_at": fila["completed_at"],
+        "categoria_id": fila["categoria_id"]
+    } for fila in registros])
 
 @app.route('/api/tarea/<int:id>', methods=["GET", "PUT", "PATCH", "DELETE"])
 def api_tareas_show(id):
@@ -60,6 +70,9 @@ def api_tareas_show(id):
 
     nombre = str(data.get("nombre", "")).strip()
     categoria = str(data.get("categoria", "")).strip()
+    fecha_limite = data.get("fecha_limite")
+    prioridad = data.get("prioridad")
+    tiempo_estimado = data.get("tiempo_estimado")
 
     if nombre == "":
         return jsonify({"error": "El nombre de la tarea es obligatorio"}), 400
@@ -70,6 +83,14 @@ def api_tareas_show(id):
         categoria_id = Categoria.get_or_create(categoria)
         Tarea.update(id, nombre)
         Tarea.move_to_categoria(id, categoria_id)
+        
+        # Actualizar nuevos campos si se proporcionan
+        if fecha_limite is not None:
+            Tarea.set_fecha_limite(id, fecha_limite)
+        if prioridad is not None:
+            Tarea.set_prioridad(id, prioridad)
+        if tiempo_estimado is not None:
+            Tarea.set_tiempo_estimado(id, tiempo_estimado)
     except ValueError as err:
         return jsonify({"error": str(err)}), 400
 
@@ -99,9 +120,23 @@ def api_tareas_create():
     categoria = str(data.get("categoria", "")).strip()
     if categoria == "":
         return jsonify({"error": "Debes proporcionar una 'categoria' válida"}), 400
+    
+    # Nuevos campos opcionales
+    fecha_limite = data.get("fecha_limite")
+    prioridad = data.get("prioridad")
+    tiempo_estimado = data.get("tiempo_estimado")
+    estado = data.get("estado", "pendiente")
+    
     try:
         categoria_id = Categoria.get_or_create(categoria)
-        new_id = Tarea.create(nombre=nombre, categoria_id=categoria_id)
+        new_id = Tarea.create(
+            nombre=nombre, 
+            categoria_id=categoria_id,
+            estado=estado,
+            fecha_limite=fecha_limite,
+            prioridad=prioridad,
+            tiempo_estimado=tiempo_estimado
+        )
     except ValueError as err:
         return jsonify({"error": str(err)}), 400
 
@@ -118,9 +153,27 @@ def nueva_tarea():
     if request.method == "POST": # Verificamos si la petición es POST (envío de formulario)
         nombre = request.form.get("title", "").strip()
         categoria = request.form.get("categoria", "").strip()
+        fecha_limite = request.form.get("fecha_limite", "").strip() or None
+        prioridad = request.form.get("prioridad", "").strip() or None
+        tiempo_estimado = request.form.get("tiempo_estimado", "").strip() or None
+        
+        # Convertir tiempo_estimado a entero si se proporciona
+        if tiempo_estimado:
+            try:
+                tiempo_estimado = int(tiempo_estimado)
+            except ValueError:
+                flash("El tiempo estimado debe ser un número válido", "danger")
+                return redirect("/crear")
+        
         try:
             categoria_id = Categoria.get_or_create(categoria)
-            Tarea.create(nombre=nombre, categoria_id=categoria_id)
+            Tarea.create(
+                nombre=nombre, 
+                categoria_id=categoria_id,
+                fecha_limite=fecha_limite,
+                prioridad=prioridad,
+                tiempo_estimado=tiempo_estimado
+            )
         except ValueError as err:
             flash(str(err), "danger")
             return redirect(f"/crear")
@@ -156,10 +209,30 @@ def editar(id): # EDITA Y ACTUALIZA UNA TAREA EXISTENTE
     if request.method == "POST":
         nombre = request.form.get("title", "").strip()
         categoria = request.form.get("categoria", "").strip()
+        fecha_limite = request.form.get("fecha_limite", "").strip() or None
+        prioridad = request.form.get("prioridad", "").strip() or None
+        tiempo_estimado = request.form.get("tiempo_estimado", "").strip() or None
+        
+        # Convertir tiempo_estimado a entero si se proporciona
+        if tiempo_estimado:
+            try:
+                tiempo_estimado = int(tiempo_estimado)
+            except ValueError:
+                flash("El tiempo estimado debe ser un número válido", "danger")
+                return redirect(f"/editar/{id}")
+        
         try:
             categoria_id = Categoria.get_or_create(categoria)
             Tarea.update(id, nombre)
             Tarea.move_to_categoria(id, categoria_id)
+            
+            # Actualizar nuevos campos
+            if fecha_limite is not None:
+                Tarea.set_fecha_limite(id, fecha_limite)
+            if prioridad is not None:
+                Tarea.set_prioridad(id, prioridad)
+            if tiempo_estimado is not None:
+                Tarea.set_tiempo_estimado(id, tiempo_estimado)
         except ValueError as err:
             flash(str(err), "danger")
             return redirect(f"/editar/{id}")

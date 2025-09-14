@@ -16,8 +16,35 @@
           <dl class="row mb-0">
             <dt class="col-sm-4">Categoría</dt>
             <dd class="col-sm-8">{{ categoria.nombre }}</dd>
+            <dt class="col-sm-4">Prioridad</dt>
+            <dd class="col-sm-8">
+              <span class="badge 
+                {% if tarea.prioridad == 'alta' %}bg-danger
+                {% elif tarea.prioridad == 'media' %}bg-warning
+                {% else %}bg-info{% endif %}">
+                {{ tarea.prioridad|title }}
+              </span>
+            </dd>
+            {% if tarea.fecha_limite %}
+            <dt class="col-sm-4">Fecha límite</dt>
+            <dd class="col-sm-8">
+              <span>{{ tarea.fecha_limite }}</span>
+              {% if tarea.estado != 'completada' %}
+              <small class="text-danger">(Revisar fecha)</small>
+              {% endif %}
+            </dd>
+            {% endif %}
+            
+            {% if tarea.tiempo_estimado %}
+            <dt class="col-sm-4">Tiempo estimado</dt>
+            <dd class="col-sm-8">{{ tarea.tiempo_estimado }} minutos</dd>
+            {% endif %}
             <dt class="col-sm-4">Creada</dt>
             <dd class="col-sm-8"><small class="text-muted">{{ tarea.created_at }}</small></dd>
+            {% if tarea.completed_at %}
+            <dt class="col-sm-4">Completada</dt>
+            <dd class="col-sm-8"><small class="text-success">{{ tarea.completed_at }}</small></dd>
+            {% endif %}
             <dt class="col-sm-4">Actualizada</dt>
             <dd class="col-sm-8"><small class="text-muted">{{ tarea.updated_at }}</small></dd>
           </dl>

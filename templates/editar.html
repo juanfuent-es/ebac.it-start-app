@@ -33,13 +33,13 @@
   <!-- id="nombre" = Identificador único del campo (se asocia con for="nombre") -->
   <input name="title" class="form-control" value="{{ tarea.nombre }}" type="text" id="nombre">
   <!-- Selección de categoría -->
-  <!-- Soporta elegir una categoría existente o crear una nueva escribiendo el nombre -->
   <br>
   <label class="form-label" for="categoria">Categoría</label>
   <select
     id="categoria"
     name="categoria"
     placeholder="Selecciona o crea una categoría"
+    class="form-control"
   >
     <option value="" disabled>Selecciona una categoría</option>
     {% if categorias %}
@@ -49,6 +49,34 @@
     {% endfor %}
     {% endif %}
   </select>
+  <!-- Fecha límite -->
+  <br>
+  <label class="form-label" for="fecha_limite">Fecha límite (opcional)</label>
+  <input name="fecha_limite" class="form-control" type="date" id="fecha_limite" value="{{ tarea.fecha_limite if tarea.fecha_limite else '' }}">
+  <!-- Prioridad -->
+  <br>
+  <label class="form-label" for="prioridad">Prioridad</label>
+  <select name="prioridad" class="form-control" id="prioridad">
+    {% if tarea.prioridad == 'baja' %}
+    <option value="baja" selected>Baja</option>
+    {% else %}
+    <option value="baja">Baja</option>
+    {% endif %}
+    {% if tarea.prioridad == 'media' %}
+    <option value="media" selected>Media</option>
+    {% else %}
+    <option value="media">Media</option>
+    {% endif %}
+    {% if tarea.prioridad == 'alta' %}
+    <option value="alta" selected>Alta</option>
+    {% else %}
+    <option value="alta">Alta</option>
+    {% endif %}
+  </select>
+  <!-- Tiempo estimado -->
+  <br>
+  <label class="form-label" for="tiempo_estimado">Tiempo estimado (minutos)</label>
+  <input name="tiempo_estimado" class="form-control" type="number" id="tiempo_estimado" min="0" placeholder="Ej: 30" value="{{ tarea.tiempo_estimado if tarea.tiempo_estimado else '' }}">
   <!-- Espaciado -->
   <br>
   <!-- BOTÓN DE ENVÍO -->
@@ -85,10 +113,21 @@
       const id = form.getAttribute('data-id');
       const nombre = document.querySelector('#nombre').value.trim();
       const categoria = document.querySelector('#categoria').value.trim();
+      const fecha_limite = document.querySelector('#fecha_limite').value || null;
+      const prioridad = document.querySelector('#prioridad').value;
+      const tiempo_estimado = document.querySelector('#tiempo_estimado').value ? 
+        parseInt(document.querySelector('#tiempo_estimado').value) : null;
+      
       try {
         await apiFetch(`/api/tarea/${id}`, {
           method: 'PATCH',
-          body: JSON.stringify({ nombre, categoria })
+          body: JSON.stringify({ 
+            nombre, 
+            categoria, 
+            fecha_limite, 
+            prioridad, 
+            tiempo_estimado 
+          })
         });
         window.location.href = `/tarea/${id}`;
       } catch (err) {

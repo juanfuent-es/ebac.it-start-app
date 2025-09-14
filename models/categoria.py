@@ -65,3 +65,34 @@ class Categoria:
         query = execute("DELETE FROM categorias WHERE id = ?", (categoria_id,))
         print(f" * Categoría eliminada: {query}")
         return query
+
+    # ------------------------------------------------------------------
+    # JOINs — tareas con nombre de categoría
+    # ------------------------------------------------------------------
+    @staticmethod
+    def tareas_join(categoria_id=None):
+        """Devuelve tareas con el nombre de la categoría incluido.
+        
+        Si categoria_id es None, devuelve todas las tareas con sus categorías.
+        Si categoria_id es especificado, filtra por esa categoría.
+        """
+        if categoria_id is None:
+            return query_all(
+                """SELECT t.id, t.nombre, t.created_at, t.fecha_limite, t.prioridad, t.estado, 
+                          t.tiempo_estimado, t.completed_at, t.categoria_id, t.updated_at,
+                          c.nombre as categoria_nombre
+                   FROM tareas t 
+                   LEFT JOIN categorias c ON t.categoria_id = c.id 
+                   ORDER BY t.id"""
+            )
+        else:
+            return query_all(
+                """SELECT t.id, t.nombre, t.created_at, t.fecha_limite, t.prioridad, t.estado, 
+                          t.tiempo_estimado, t.completed_at, t.categoria_id, t.updated_at,
+                          c.nombre as categoria_nombre
+                   FROM tareas t 
+                   LEFT JOIN categorias c ON t.categoria_id = c.id 
+                   WHERE t.categoria_id = ?
+                   ORDER BY t.id""",
+                (categoria_id,)
+            )
