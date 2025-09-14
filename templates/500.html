@@ -1,0 +1,15 @@
+{% extends 'layout.html' %}
+{% block title %}Error 500 - Error interno{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+  <h1 class="display-5">Ups, algo salió mal</h1>
+  <p class="lead">Se produjo un error interno del servidor (500).</p>
+  <p>Vuelve a intentarlo en unos segundos o regresa al inicio.</p>
+  <a class="btn btn-primary" href="/">Ir al inicio</a>
+  {% if config.DEBUG %}
+  <hr>
+  <p class="text-muted">DEBUG está activo. Revisa los logs para más detalles.</p>
+  {% endif %}
+</div>
+{% endblock %}

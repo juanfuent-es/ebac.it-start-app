@@ -13,6 +13,7 @@ async function apiFetch(url, options = {}) {
   try {
     data = await response.json();
   } catch (e) {
+    console.error("Ocurrió un error al parsear el JSON", e);
     // Ignorar si no hay JSON
   }
   if (!response.ok) {
@@ -20,6 +21,7 @@ async function apiFetch(url, options = {}) {
     const err = new Error(message);
     err.status = response.status;
     err.data = data;
+    console.error(err);
     throw err;
   }
   return data;
