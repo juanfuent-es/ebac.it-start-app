@@ -28,7 +28,13 @@
             {% if tarea.fecha_limite %}
             <dt class="col-sm-4">Fecha límite</dt>
             <dd class="col-sm-8">
-              <span>{{ tarea.fecha_limite }}</span>
+              <span>
+                {% if 'T' in tarea.fecha_limite %}
+                  {{ tarea.fecha_limite.replace('T', ' ') }}
+                {% else %}
+                  {{ tarea.fecha_limite }}
+                {% endif %}
+              </span>
               {% if tarea.estado != 'completada' %}
               <small class="text-danger">(Revisar fecha)</small>
               {% endif %}
@@ -40,13 +46,13 @@
             <dd class="col-sm-8">{{ tarea.tiempo_estimado }} minutos</dd>
             {% endif %}
             <dt class="col-sm-4">Creada</dt>
-            <dd class="col-sm-8"><small class="text-muted">{{ tarea.created_at }}</small></dd>
-            {% if tarea.completed_at %}
+            <dd class="col-sm-8"><small class="text-muted">{{ tarea.fecha_creacion }}</small></dd>
+            {% if tarea.completado_en %}
             <dt class="col-sm-4">Completada</dt>
-            <dd class="col-sm-8"><small class="text-success">{{ tarea.completed_at }}</small></dd>
+            <dd class="col-sm-8"><small class="text-success">{{ tarea.completado_en }}</small></dd>
             {% endif %}
             <dt class="col-sm-4">Actualizada</dt>
-            <dd class="col-sm-8"><small class="text-muted">{{ tarea.updated_at }}</small></dd>
+            <dd class="col-sm-8"><small class="text-muted">{{ tarea.fecha_actualizacion }}</small></dd>
           </dl>
         </div>
         <div class="card-footer d-flex gap-2">

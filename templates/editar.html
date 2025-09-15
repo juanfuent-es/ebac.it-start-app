@@ -44,15 +44,15 @@
     <option value="" disabled>Selecciona una categoría</option>
     {% if categorias %}
       {% for cat in categorias %}
-        {% set is_selected = (cat.id|string) == (tarea.categoria_id|string) %}
+        {% set is_selected = (cat.id|string) == (tarea.id_categoria|string) %}
     <option value="{{ cat.nombre }}" {% if is_selected %}selected{% endif %}>{{ cat.nombre }}</option>
     {% endfor %}
     {% endif %}
   </select>
   <!-- Fecha límite -->
   <br>
-  <label class="form-label" for="fecha_limite">Fecha límite (opcional)</label>
-  <input name="fecha_limite" class="form-control" type="date" id="fecha_limite" value="{{ tarea.fecha_limite if tarea.fecha_limite else '' }}">
+  <label class="form-label" for="fecha_limite">Fecha y hora límite (opcional)</label>
+  <input name="fecha_limite" class="form-control" type="datetime-local" id="fecha_limite" value="{{ tarea.fecha_limite if tarea.fecha_limite else '' }}">
   <!-- Prioridad -->
   <br>
   <label class="form-label" for="prioridad">Prioridad</label>

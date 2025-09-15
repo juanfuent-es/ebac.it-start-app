@@ -78,21 +78,21 @@ class Categoria:
         """
         if categoria_id is None:
             return query_all(
-                """SELECT t.id, t.nombre, t.created_at, t.fecha_limite, t.prioridad, t.estado, 
-                          t.tiempo_estimado, t.completed_at, t.categoria_id, t.updated_at,
+                """SELECT t.id, t.nombre, t.creado_en, t.fecha_limite, t.prioridad, t.estado, 
+                          t.tiempo_estimado, t.completado_en, t.id_categoria, t.actualizado_en,
                           c.nombre as categoria_nombre
                    FROM tareas t 
-                   LEFT JOIN categorias c ON t.categoria_id = c.id 
+                   LEFT JOIN categorias c ON t.id_categoria = c.id 
                    ORDER BY t.id"""
             )
         else:
             return query_all(
-                """SELECT t.id, t.nombre, t.created_at, t.fecha_limite, t.prioridad, t.estado, 
-                          t.tiempo_estimado, t.completed_at, t.categoria_id, t.updated_at,
+                """SELECT t.id, t.nombre, t.creado_en, t.fecha_limite, t.prioridad, t.estado, 
+                          t.tiempo_estimado, t.completado_en, t.id_categoria, t.actualizado_en,
                           c.nombre as categoria_nombre
                    FROM tareas t 
-                   LEFT JOIN categorias c ON t.categoria_id = c.id 
-                   WHERE t.categoria_id = ?
+                   LEFT JOIN categorias c ON t.id_categoria = c.id 
+                   WHERE t.id_categoria = ?
                    ORDER BY t.id""",
                 (categoria_id,)
             )

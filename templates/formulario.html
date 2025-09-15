@@ -24,59 +24,65 @@
 <!-- FORMULARIO HTML -->
 <!-- action="/crear" = URL donde se envían los datos -->
 <!-- method="post" = Método HTTP para enviar datos de forma segura -->
-<form action="/crear" method="post" id="crear-tarea-form">
+<form action="/crear" method="post" id="crear-tarea-form" class="row">
   <!-- ETIQUETA DEL CAMPO -->
   <!-- for="nombre" = Asocia la etiqueta con el campo de entrada -->
   <!-- form-label = Clase de Bootstrap para estilizar etiquetas -->
-  <label class="form-label" for="nombre">Título de la tarea</label>
-  <!-- CAMPO DE ENTRADA -->
-  <!-- name="title" = Nombre del campo (se usa en request.form["title"]) -->
-  <!-- class="form-control" = Estilo de Bootstrap para campos de entrada -->
-  <!-- type="text" = Tipo de entrada (texto) -->
-  <!-- id="nombre" = Identificador único del campo (se asocia con for="nombre") -->
-  <input name="title" class="form-control" type="text" id="nombre" required>
-  <!-- Selección de categoría -->
-  <br>
-  <label class="form-label" for="categoria">Categoría</label>
-  <select
-    id="categoria"
-    name="categoria"
-    placeholder="Selecciona o crea una categoría"
-    class="form-control"
-  >
-    <option value="" disabled selected>Selecciona una categoría</option>
-    {% if categorias %}
-      {% for c in categorias %}
-    <option value="{{ c.nombre }}">{{ c.nombre }}</option>
-    {% endfor %}
-    {% endif %}
-  </select>
-  <p><small><i>*Puedes crear una categoría nueva escribiendo el nombre y pulsando Enter</i></small></p>
+  <div class="col-md-6">
+    <label class="form-label" for="nombre">Título de la tarea</label>
+    <!-- CAMPO DE ENTRADA -->
+    <!-- name="title" = Nombre del campo (se usa en request.form["title"]) -->
+    <!-- class="form-control" = Estilo de Bootstrap para campos de entrada -->
+    <!-- type="text" = Tipo de entrada (texto) -->
+    <!-- id="nombre" = Identificador único del campo (se asocia con for="nombre") -->
+    <input name="title" class="form-control" type="text" id="nombre" required>
+    <!-- Selección de categoría -->
+  </div>
+  <div class="col-md-6">
+    <label class="form-label" for="categoria">Categoría</label>
+    <select
+      id="categoria"
+      name="categoria"
+      placeholder="Selecciona o crea una categoría"
+    >
+      <option value="" disabled selected>Selecciona una categoría</option>
+      {% if categorias %}
+        {% for c in categorias %}
+      <option value="{{ c.nombre }}">{{ c.nombre }}</option>
+      {% endfor %}
+      {% endif %}
+    </select>
+    <p><small><i>*Puedes crear una categoría nueva escribiendo el nombre y pulsando Enter</i></small></p>
+  </div>
   <!-- Fecha límite -->
-  <br>
-  <label class="form-label" for="fecha_limite">Fecha límite (opcional)</label>
-  <input name="fecha_limite" class="form-control" type="date" id="fecha_limite">
+  <div class="col-md-4">
+    <label class="form-label" for="fecha_limite">Fecha y hora límite (opcional)</label>
+    <input name="fecha_limite" class="form-control" type="datetime-local" id="fecha_limite">
+  </div>
   <!-- Prioridad -->
-  <br>
-  <label class="form-label" for="prioridad">Prioridad</label>
-  <select name="prioridad" class="form-control" id="prioridad">
-    <option value="media" selected>Media</option>
-    <option value="baja">Baja</option>
-    <option value="alta">Alta</option>
-  </select>
+  <div class="col-md-4">
+    <label class="form-label" for="prioridad">Prioridad</label>
+    <select name="prioridad" class="form-control" id="prioridad">
+      <option value="media" selected>Media</option>
+      <option value="baja">Baja</option>
+      <option value="alta">Alta</option>
+    </select>
+  </div>
   <!-- Tiempo estimado -->
-  <br>
-  <label class="form-label" for="tiempo_estimado">Tiempo estimado (minutos)</label>
-  <input name="tiempo_estimado" class="form-control" type="number" id="tiempo_estimado" min="0" placeholder="Ej: 30">
-  <!-- Espaciado -->
-  <br>
-  <!-- BOTÓN DE ENVÍO -->
-  <!-- type="submit" = Botón que envía el formulario -->
-  <!-- class="btn btn-primary" = Estilo de botón azul de Bootstrap -->
-  <button type="submit" class="btn btn-primary">
-    <i class="bi bi-save me-1"></i>
-    Guardar
-  </button>
+  <div class="col-md-4">
+    <label class="form-label" for="tiempo_estimado">Tiempo estimado (minutos)</label>
+    <input name="tiempo_estimado" class="form-control" type="number" id="tiempo_estimado" min="0" placeholder="Ej: 30">
+  </div>
+  <footer class="col-md-12 mt-2 text-right">
+    <!-- Espaciado -->
+    <!-- BOTÓN DE ENVÍO -->
+    <!-- type="submit" = Botón que envía el formulario -->
+    <!-- class="btn btn-primary" = Estilo de botón azul de Bootstrap -->
+    <button type="submit" class="btn btn-primary float-end  ">
+      <i class="bi bi-save me-1"></i>
+      Guardar
+    </button>
+  </footer>
 </form>
 <!-- Tom Select: permite crear opciones nuevas al vuelo sin jQuery -->
 <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.css" rel="stylesheet">

@@ -45,13 +45,14 @@ def api_tareas_index():
     return jsonify([{
         "id": fila["id"], 
         "nombre": fila["nombre"],
-        "created_at": fila["created_at"],
+        "fecha_creacion": fila["fecha_creacion"],
         "fecha_limite": fila["fecha_limite"],
         "prioridad": fila["prioridad"],
         "estado": fila["estado"],
         "tiempo_estimado": fila["tiempo_estimado"],
-        "completed_at": fila["completed_at"],
-        "categoria_id": fila["categoria_id"]
+        "completado_en": fila["completado_en"],
+        "id_categoria": fila["id_categoria"],
+        "fecha_actualizacion": fila["fecha_actualizacion"]
     } for fila in registros])
 
 @app.route('/api/tarea/<int:id>', methods=["GET", "PUT", "PATCH", "DELETE"])
@@ -108,6 +109,7 @@ def api_tareas_toggle_estado(id):
     actualizado = Tarea.get_by_id(id)
     return jsonify(dict(actualizado))
 
+
 @app.route('/api/tareas', methods=["POST"])
 def api_tareas_create():
     if not request.is_json:
@@ -131,7 +133,7 @@ def api_tareas_create():
         categoria_id = Categoria.get_or_create(categoria)
         new_id = Tarea.create(
             nombre=nombre, 
-            categoria_id=categoria_id,
+            id_categoria=categoria_id,
             estado=estado,
             fecha_limite=fecha_limite,
             prioridad=prioridad,
@@ -169,7 +171,7 @@ def nueva_tarea():
             categoria_id = Categoria.get_or_create(categoria)
             Tarea.create(
                 nombre=nombre, 
-                categoria_id=categoria_id,
+                id_categoria=categoria_id,
                 fecha_limite=fecha_limite,
                 prioridad=prioridad,
                 tiempo_estimado=tiempo_estimado
@@ -188,7 +190,7 @@ def detalle(id): # CONSULTA EL DETALLE DE UNA TAREA ESPECÍFICA
     tarea = Tarea.get_by_id(id)
     if not tarea:
         return render_template("404.html"), 404
-    categoria = Categoria.get_by_id(tarea["categoria_id"])
+    categoria = Categoria.get_by_id(tarea["id_categoria"])
     return render_template("tarea.html", tarea=tarea, categoria=categoria)
 
 @app.route('/tarea/<int:id>/toggle-estado', methods=["POST"])

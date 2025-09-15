@@ -61,7 +61,11 @@
           {% if tarea.fecha_limite %}
           <small class="text-muted">
             <i class="bi bi-calendar-event me-1"></i>
-            {{ tarea.fecha_limite }}
+            {% if 'T' in tarea.fecha_limite %}
+              {{ tarea.fecha_limite.replace('T', ' ') }}
+            {% else %}
+              {{ tarea.fecha_limite }}
+            {% endif %}
           </small>
           {% endif %}
           <!-- Tiempo estimado -->
