@@ -10,8 +10,10 @@
 # En esta sección importamos dependencias, inicializamos la base
 # de datos y declaramos utilidades de apoyo.
 # Importamos las clases y funciones que necesitamos de Flask
-from flask import Flask, render_template, request, redirect, flash, abort, jsonify
+from flask import Flask, render_template, request, redirect, flash, abort, jsonify, Response
 import sqlite3
+import csv
+import io
 from database import init_db
 from models.categoria import Categoria
 from models.tarea import Tarea
@@ -54,6 +56,59 @@ def api_tareas_index():
         "id_categoria": fila["id_categoria"],
         "fecha_actualizacion": fila["fecha_actualizacion"]
     } for fila in registros])
+
+@app.route('/api/tareas.csv', methods=["GET"])
+def api_tareas_csv():
+    """Exporta todas las tareas en formato CSV"""
+    registros = Tarea.get_all()
+    
+    # Crear un buffer en memoria para escribir el CSV
+    output = io.StringIO()
+    writer = csv.writer(output)
+    
+    # Escribir encabezados
+    headers = [
+        'id', 'nombre', 'fecha_creacion', 'fecha_limite', 'prioridad', 
+        'estado', 'tiempo_estimado', 'fecha_completado', 'fecha_actualizacion', 'categoria'
+    ]
+    writer.writerow(headers)
+    
+    # Escribir datos
+    for fila in registros:
+        # Obtener nombre de categoría
+        categoria_nombre = "Sin categoría"
+        if fila['id_categoria']:
+            categoria = Categoria.get_by_id(fila['id_categoria'])
+            if categoria:
+                categoria_nombre = categoria['nombre']
+        
+        row = [
+            fila['id'],
+            fila['nombre'],
+            fila['fecha_creacion'],
+            fila['fecha_limite'],
+            fila['prioridad'],
+            fila['estado'],
+            fila['tiempo_estimado'],
+            fila['completado_en'],
+            fila['fecha_actualizacion'],
+            categoria_nombre
+        ]
+        writer.writerow(row)
+    
+    # Preparar respuesta CSV
+    output.seek(0)
+    csv_data = output.getvalue()
+    output.close()
+    
+    return Response(
+        csv_data,
+        mimetype='text/csv',
+        headers={
+            'Content-Disposition': 'attachment; filename=tareas.csv',
+            'Content-Type': 'text/csv; charset=utf-8'
+        }
+    )
 
 @app.route('/api/tarea/<int:id>', methods=["GET", "PUT", "PATCH", "DELETE"])
 def api_tareas_show(id):
