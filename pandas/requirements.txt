@@ -1,0 +1,35 @@
+# Dependencias para análisis de tareas con Pandas
+# ==============================================
+
+# Análisis de datos
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Visualización
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# Comunicación con API
+requests>=2.31.0
+
+# Manejo de fechas (incluido en Python estándar, pero por compatibilidad)
+python-dateutil>=2.8.0
+
+# Opcional: para análisis estadísticos avanzados
+scipy>=1.10.0
+
+# Opcional: para exportar a Excel
+openpyxl>=3.1.0
+
+# Opcional: para análisis de texto en nombres de tareas
+textblob>=0.17.0
+
+# Opcional: para conexión directa a base de datos SQLite
+# (ya incluido en Python estándar, pero útil para versiones específicas)
+# sqlite3
+
+# Opcional: para crear reportes en HTML
+jinja2>=3.1.0
+
+# Opcional: para análisis de tendencias temporales
+statsmodels>=0.14.0
