@@ -109,6 +109,7 @@ def filtrar_estados(estado='pendiente'):
         print("\nTareas filtradas:")
         print(filtradas[['nombre', 'estado', 'fecha_limite']].head())
 
+
 explorar_datos()
 limpiar_datos()
 analizar_estados()
@@ -116,3 +117,5 @@ analizar_prioridades()
 analizar_tiempo()
 filtrar_prioridades('baja')
 filtrar_estados('completada')
+
+df.to_csv('tareas.csv', index=True, encoding='utf-8')
