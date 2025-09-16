@@ -52,6 +52,7 @@ def crear_columnas_derivadas():
     print(f"Columna 'atrasada' creada: {df['atrasada']}")
     df['mes'] = df['fecha_creacion'].dt.month
     print(f"Columna 'mes' creada: {df['mes']}")
+    df['semana'] = df['completado_en'].dt.isocalendar().week
     
     df['dias_entre_creacion_y_entrega'] = (df['completado_en'] - df['fecha_creacion']).dt.days
     print(f"Columna 'dias_entre_creacion_y_entrega' creada: {df['dias_entre_creacion_y_entrega']}")
@@ -65,30 +66,22 @@ def crear_columnas_derivadas():
     df['tiempo_estimado_horas'] = df['tiempo_estimado'] / 60
     print(f"Columna 'tiempo_estimado_horas' creada: {df['tiempo_estimado_horas']}")
 
-    df['dias_retraso'] = (df['completado_en'] - df['fecha_limite']).dt.days
-
 def analizar_rendimiento():
     print("Analizando rendimiento del equipo...")
+
     porcentaje_cumplimiento = df['cumplimiento'].mean() * 100
     print(f"Porcentaje de cumplimiento: {porcentaje_cumplimiento:.2f}%")
     
+    df['dias_retraso'] = (df['completado_en'] - df['fecha_limite']).dt.days
     retrasadas = df[df['dias_retraso'] > 0]
     print(f"Tareas entregadas fuera de plazo: {len(retrasadas)}")
-
+    
     if len(retrasadas) > 0:
         promedio_retraso = retrasadas['dias_retraso'].mean()
         print(f"Promedio de días de retraso: {promedio_retraso:.2f}")
 
-limpiar_datos_basicos()
-detectar_outliers()
-crear_columnas_derivadas()
-analizar_rendimiento()
-
-
 def agrupar_por_prioridad():
-
     print("Agrupando por prioridad...")
-    
     tiempo_promedio = df.groupby('prioridad')['tiempo_estimado'].mean()
     print("Tiempo promedio estimado por prioridad:")
     print(tiempo_promedio)
@@ -100,15 +93,11 @@ def agrupar_por_prioridad():
 
 def analizar_por_mes():
     print("Analizando por mes de creación...")
-    
-    df['mes'] = df['fecha_creacion'].dt.month
     tareas_por_mes = df.groupby('mes').size()
     print(f"Tareas creadas por mes: {tareas_por_mes}")
 
 def analizar_por_semana():
     print("Analizando por semana...")
-    
-    df['semana'] = df['completado_en'].dt.isocalendar().week
     tareas_por_semana = df.groupby('semana').size()
     print(f"Tareas completadas por semana: {tareas_por_semana}")
     
@@ -119,7 +108,16 @@ def estadisticas_descriptivas():
     print(f"Promedio de duración estimada: {promedio_duracion:.2f} minutos")
     
     tareas_por_dia = df.groupby(df['fecha_creacion'].dt.date).size()
-    print(f"Tareas creadas por día (últimos 5 días): {tareas_por_dia.tail()}")
+    print(f"Tareas creadas por día (últimos 10 días): {tareas_por_dia.tail(5)}")
     
     porcentaje_cumplimiento = df['cumplimiento'].mean() * 100
     print(f"Porcentaje de cumplimiento: {porcentaje_cumplimiento:.2f}%")
+
+limpiar_datos_basicos()
+detectar_outliers()
+crear_columnas_derivadas()
+analizar_rendimiento()
+agrupar_por_prioridad()
+analizar_por_mes()
+analizar_por_semana()
+estadisticas_descriptivas()
