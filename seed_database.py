@@ -13,7 +13,8 @@ Fecha: 2025
 
 import pandas as pd
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timedelta
+import random
 from database import init_db, connect_db, execute
 from models.categoria import Categoria
 from models.tarea import Tarea
@@ -118,14 +119,20 @@ class DatabaseSeeder:
                 if prioridad not in ['baja', 'media', 'alta']:
                     prioridad = 'media'  # Valor por defecto
                 
-                # Fecha límite
+                # Fecha límite (datetime y string)
+                fecha_limite_dt = None
                 fecha_limite = None
                 if not pd.isna(row['fecha_limite']):
                     try:
-                        fecha_limite = pd.to_datetime(row['fecha_limite'])
-                        fecha_limite = fecha_limite.strftime('%Y-%m-%dT%H:%M')
-                    except:
+                        fecha_limite_dt = pd.to_datetime(row['fecha_limite']).to_pydatetime()
+                        fecha_limite = fecha_limite_dt.strftime('%Y-%m-%dT%H:%M')
+                    except Exception:
+                        fecha_limite_dt = None
                         fecha_limite = None
+                # Si no hay fecha límite en CSV, generar dentro de los próximos 120 días
+                if fecha_limite_dt is None:
+                    fecha_limite_dt = datetime.now() + timedelta(days=random.randint(7, 120))
+                    fecha_limite = fecha_limite_dt.strftime('%Y-%m-%dT%H:%M')
                 
                 # Tiempo estimado
                 tiempo_estimado = None
@@ -147,23 +154,69 @@ class DatabaseSeeder:
                     tiempo_estimado=tiempo_estimado
                 )
                 
-                # Si la tarea está completada, actualizar la fecha de completado
-                if estado == 'completada' and not pd.isna(row['fecha_completado']):
+                # Construir fechas realistas: creación y actualización dentro de 4 meses
+                # created_at antes que fecha_limite; updated_at entre creación y min(fecha_limite, completado_en)
+                ahora = datetime.now()
+                # Fecha de creación entre 1 y 60 días antes de fecha_limite, evitando futuro
+                delta_crea = random.randint(1, 60)
+                fecha_creacion_dt = fecha_limite_dt - timedelta(days=delta_crea)
+                if fecha_creacion_dt > ahora:
+                    fecha_creacion_dt = ahora - timedelta(days=random.randint(1, 7))
+
+                # Si la tarea está completada, determinar completado_en
+                completado_dt = None
+                if estado == 'completada':
                     try:
-                        fecha_completado = pd.to_datetime(row['fecha_completado'])
-                        fecha_completado_str = fecha_completado.strftime('%Y-%m-%d %H:%M:%S')
-                        
-                        # Actualizar la fecha de completado directamente en la base de datos
-                        conn = connect_db()
+                        if 'fecha_completado' in self.df.columns and not pd.isna(row['fecha_completado']):
+                            completado_dt = pd.to_datetime(row['fecha_completado']).to_pydatetime()
+                        else:
+                            # Generar entre creación y fecha_limite
+                            inicio = fecha_creacion_dt
+                            fin = min(fecha_limite_dt, ahora)
+                            # Asegurar que haya al menos 1 día
+                            if fin <= inicio:
+                                fin = inicio + timedelta(days=1)
+                            completado_dt = inicio + timedelta(days=random.randint(0, (fin - inicio).days))
+                    except Exception:
+                        completado_dt = None
+
+                # Fecha de actualización: entre creación y (completado o fecha_limite), no en el futuro
+                limite_actualizacion_dt = min([d for d in [completado_dt, fecha_limite_dt, ahora] if d is not None])
+                if limite_actualizacion_dt <= fecha_creacion_dt:
+                    limite_actualizacion_dt = fecha_creacion_dt + timedelta(hours=random.randint(1, 72))
+                if limite_actualizacion_dt > ahora:
+                    limite_actualizacion_dt = ahora
+                # Elegir un punto entre creación y límite
+                rango_segundos = int((limite_actualizacion_dt - fecha_creacion_dt).total_seconds())
+                if rango_segundos < 3600:
+                    rango_segundos = 3600
+                fecha_actualizacion_dt = fecha_creacion_dt + timedelta(seconds=random.randint(0, rango_segundos))
+
+                # Persistir fechas en la BD
+                try:
+                    conn = connect_db()
+                    # Actualizar creación y actualización
+                    conn.execute(
+                        "UPDATE tareas SET fecha_creacion = ?, fecha_actualizacion = ? WHERE id = ?",
+                        (
+                            fecha_creacion_dt.strftime('%Y-%m-%d %H:%M:%S'),
+                            fecha_actualizacion_dt.strftime('%Y-%m-%d %H:%M:%S'),
+                            tarea_id,
+                        ),
+                    )
+                    # Actualizar completado_en si aplica
+                    if completado_dt is not None:
                         conn.execute(
                             "UPDATE tareas SET completado_en = ? WHERE id = ?",
-                            (fecha_completado_str, tarea_id)
+                            (
+                                completado_dt.strftime('%Y-%m-%d %H:%M:%S'),
+                                tarea_id,
+                            ),
                         )
-                        conn.commit()
-                        conn.close()
-                        
-                    except Exception as e:
-                        print(f"   ⚠️ Error al actualizar fecha completado para tarea {tarea_id}: {e}")
+                    conn.commit()
+                    conn.close()
+                except Exception as e:
+                    print(f"   ⚠️ Error al actualizar fechas para tarea {tarea_id}: {e}")
                 
                 tareas_creadas += 1
                 
