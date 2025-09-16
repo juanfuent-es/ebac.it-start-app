@@ -25,54 +25,8 @@ def init_db():
     create_table_categorias(conn)
     create_table_tareas(conn)
     create_indices(conn)
-    migrate_fecha_limite_datetime(conn)
-    return conn
+    conn.close()
 
-def migrate_add_recurrency(conn):
-    """
-    (Obsoleta) Conservada por compatibilidad: ya no se usa porque el esquema
-    actual crea la columna 'recurrencia' directamente.
-    """
-    try:
-        cursor = conn.execute("PRAGMA table_info(tareas)")
-        columns = [column[1] for column in cursor.fetchall()]
-        if 'recurrencia' not in columns:
-            print(" * Agregando columna 'recurrencia' a la tabla tareas")
-            conn.execute("ALTER TABLE tareas ADD COLUMN recurrencia TEXT")
-            conn.commit()
-            print(" * Columna 'recurrencia' agregada")
-        else:
-            print(" * Columna 'recurrencia' ya existe en la tabla tareas")
-    except Exception as e:
-        print(f" * Error al migrar columna 'recurrencia': {e}")
-        conn.rollback()
-
-def migrate_fecha_limite_datetime(conn):
-    """
-    Migración: Recrea la tabla tareas con columnas en español,
-    soporte de fecha y hora en fecha_limite, y campos de fecha renombrados.
-    ADVERTENCIA: Elimina todos los datos existentes de la tabla tareas.
-    """
-    try:
-        # Verificar si la tabla tareas existe
-        cursor = conn.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='tareas'")
-        if cursor.fetchone():
-            print(" * Migrando tabla tareas a columnas en español, soporte de fecha y hora y campos renombrados...")
-            print(" * ADVERTENCIA: Se eliminarán todos los datos existentes de tareas")
-            
-            # Eliminar la tabla existente (esto borra todos los datos)
-            conn.execute("DROP TABLE IF EXISTS tareas")
-            print(" * Tabla tareas eliminada")
-            
-            # Recrear la tabla con el nuevo esquema
-            create_table_tareas(conn)
-            print(" * Tabla tareas recreada con columnas en español, soporte de fecha y hora y campos renombrados")
-        else:
-            print(" * Tabla tareas no existe, se creará con soporte de fecha y hora y campos renombrados")
-            
-    except Exception as e:
-        print(f" * Error al migrar tabla tareas: {e}")
-        conn.rollback()
 
 def create_table_categorias(conn):
     """
