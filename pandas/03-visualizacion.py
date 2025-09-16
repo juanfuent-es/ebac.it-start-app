@@ -14,81 +14,60 @@ except Exception as e:
     print("Sugerencia: Asegúrate de que la aplicación Flask esté ejecutándose en localhost:5000")
     df = pd.DataFrame()
 
-def preparar_df_para_visualizacion():
-    """Estandariza columnas clave y prepara tipos para graficar."""
-    if df.empty:
-        return
-    # Mapear columnas posibles (es/en)
-    col_fecha_creacion = df["fecha_creacion"]
-    col_prioridad = df["prioridad"]
-    col_estado = df["estado"]
-    col_tiempo = df["tiempo_estimado"]
+def limpiar_datos():
+    print("Iniciando limpieza de datos...")
 
-    # Conversión de tipos (asumimos que las columnas existen)
-    df[col_fecha_creacion] = pd.to_datetime(df[col_fecha_creacion], errors="coerce")
-    df[col_tiempo] = pd.to_numeric(df[col_tiempo], errors="coerce")
-
-    # Crear alias uniformes (asumimos que existen las de origen)
-    df["created_at"] = df[col_fecha_creacion]
-    df["priority"] = df[col_prioridad]
-    df["status"] = df[col_estado]
-    df["estimated_time"] = df[col_tiempo]
-
+    # Solo convertir columnas de fecha a datetime
+    columnas_fecha = ['fecha_creacion','fecha_limite','completado_en', 'fecha_actualizacion', 'fecha_limite']
+    for col in columnas_fecha:
+        df[col] = pd.to_datetime(df[col], errors='coerce')
+    print(f"Formato de fecha corregido para: {columnas_fecha}")
+    # 
+    df['estado'] = df['estado'].str.lower().str.strip()
+    print("Texto normalizado a minúsculas en columna 'estado'")
 
 # 1) Gráfico de barras – comparar categorías (prioridad)
 def grafico_barras_prioridad():
     """Muestra cantidad de tareas por prioridad (responde: ¿qué categoría domina?)."""
-    if df.empty:
-        print("No hay datos.")
-        return
-    df["priority"].value_counts().sort_index().plot(kind="bar")
+    df["prioridad"].value_counts().sort_index().plot(kind="bar")
     plt.title("Tareas por prioridad")
     plt.xlabel("Prioridad")
-    plt.ylabel("Cantidad")
+    plt.ylabel("No de Tareas")
     plt.xticks(rotation=0)
     plt.grid(axis="y", linestyle="--", alpha=0.4)
     plt.tight_layout()
     plt.show()
 
-
 # 2) Gráfico de líneas – evolución en el tiempo (tareas creadas por día)
 def grafico_lineas_creadas_por_dia():
     """Evolución diaria de creación (responde: ¿cómo cambia en el tiempo?)."""
-    if df.empty:
-        print("No hay datos.")
-        return
-    conteo_diario = df.groupby(df["created_at"].dt.date).size()
-    conteo_diario.plot(kind="line", marker="o")
+    conteo_diario = df.groupby(df["fecha_creacion"].dt.date).size()
+    conteo_diario.plot(kind="line")
     plt.title("Tareas creadas por día")
     plt.xlabel("Fecha")
     plt.ylabel("Tareas creadas")
-    plt.grid(True, linestyle="--", alpha=0.4)
+    plt.grid(True, linestyle="--", alpha=0.9)
     plt.tight_layout()
     plt.show()
-
 
 # 3) Gráfico de pastel – proporciones por estado
 def grafico_pastel_estado():
     """Distribución de estados (responde: ¿qué proporción ocupa cada estado?)."""
-    if df.empty:
-        print("No hay datos.")
-        return
-    df["status"].value_counts().plot(kind="pie", autopct="%1.1f%%")
+    df["estado"].value_counts().plot(kind="pie", autopct="%1.1f%%")
     plt.title("Distribución por estado")
     plt.ylabel("")
     plt.tight_layout()
     plt.show()
 
+limpiar_datos()
+grafico_pastel_estado()
 
 # 4) Dispersión – relación entre tiempo estimado y prioridad
 def grafico_dispersion_tiempo_vs_prioridad():
     """Relación entre duración estimada y prioridad (responde: ¿existe correlación?)."""
-    if df.empty:
-        print("No hay datos.")
-        return
     # Si prioridad es categórica, convertirla a códigos para el eje Y
-    prioridad_cods = df["priority"].astype("category").cat.codes
-    plt.scatter(df["estimated_time"], prioridad_cods, alpha=0.6)
+    prioridad_cods = df["prioridad"] #.astype("category")
+    plt.scatter(df["tiempo_estimado"], prioridad_cods, alpha=0.6)
     plt.title("Duración estimada vs Prioridad")
     plt.xlabel("Minutos estimados")
     plt.ylabel("Prioridad (codificada)")
@@ -96,16 +75,14 @@ def grafico_dispersion_tiempo_vs_prioridad():
     plt.tight_layout()
     plt.show()
 
+grafico_dispersion_tiempo_vs_prioridad()
 
 # 5) Evolución semanal con unstack por prioridad
 def grafico_lineas_semana_por_prioridad():
     """Tareas creadas por semana separadas por prioridad (unstack)."""
-    if df.empty:
-        print("No hay datos.")
-        return
     df_tmp = df.copy()
-    df_tmp["semana"] = df_tmp["created_at"].dt.isocalendar().week
-    conteo = df_tmp.groupby(["semana", "priority"]).size().unstack(fill_value=0)
+    df_tmp["semana"] = df_tmp["fecha_creacion"].dt.isocalendar().week
+    conteo = df_tmp.groupby(["semana", "prioridad"]).size().unstack(fill_value=0)
     conteo.plot(kind="line", marker="o")
     plt.title("Tareas creadas por semana y prioridad")
     plt.xlabel("Semana del año")
@@ -119,10 +96,7 @@ def grafico_lineas_semana_por_prioridad():
 # 6) Personalización/legibilidad en barras (demostración)
 def demo_personalizacion_barras():
     """Demuestra cómo pequeñas personalizaciones mejoran la legibilidad."""
-    if df.empty:
-        print("No hay datos.")
-        return
-    df["priority"].value_counts().sort_values().plot(kind="bar")
+    df["prioridad"].value_counts().sort_values().plot(kind="bar")
     plt.title("Cantidad de tareas por prioridad")
     plt.xlabel("Prioridad")
     plt.ylabel("Cantidad")
@@ -135,10 +109,7 @@ def demo_personalizacion_barras():
 # 7) Agregar contexto mínimo (título, ejes, leyenda opcional)
 def agregar_contexto_minimo():
     """Ilustra el impacto de título/etiquetas/leyenda en claridad."""
-    if df.empty:
-        print("No hay datos.")
-        return
-    df["priority"].value_counts().plot(kind="bar")
+    df["prioridad"].value_counts().plot(kind="bar")
     plt.title("Distribución de tareas por prioridad")
     plt.xlabel("Prioridad")
     plt.ylabel("Cantidad")
@@ -158,11 +129,11 @@ def ejemplos_errores_comunes():
     # Categorías desordenadas vs ordenadas
     plt.figure(figsize=(8, 4))
     plt.subplot(1, 2, 1)
-    df["priority"].value_counts().plot(kind="bar")
+    df["prioridad"].value_counts().plot(kind="bar")
     plt.title("Desordenado")
     plt.xticks(rotation=90)
     plt.subplot(1, 2, 2)
-    df["priority"].value_counts().sort_values().plot(kind="bar")
+    df["prioridad"].value_counts().sort_values().plot(kind="bar")
     plt.title("Ordenado por valor")
     plt.xticks(rotation=90)
     plt.tight_layout()
@@ -177,14 +148,11 @@ def ejemplos_errores_comunes():
 # 9) Narrativa visual: pregunta -> filtro -> agrupación -> contexto -> énfasis
 def narrativa_visual_pendientes_resaltado():
     """Historia visual: ¿qué prioridad concentra más tareas pendientes?"""
-    if df.empty:
-        print("No hay datos.")
-        return
-    pendientes = df[df["status"] == "pendiente"].copy()
+    pendientes = df[df["estado"] == "pendiente"].copy()
     if pendientes.empty:
         print("No hay tareas pendientes para mostrar.")
         return
-    conteo = pendientes["priority"].value_counts()
+    conteo = pendientes["prioridad"].value_counts()
     # Resaltar la barra máxima
     colores = ["gray"] * len(conteo)
     idx_max = conteo.values.argmax()
@@ -199,14 +167,14 @@ def narrativa_visual_pendientes_resaltado():
 
 
 # Preparación y ejecución de demostraciones
-preparar_df_para_visualizacion()
+limpiar_datos()
 
 # Visualizaciones base
-grafico_barras_prioridad()
-grafico_lineas_creadas_por_dia()
-grafico_pastel_estado()
-grafico_dispersion_tiempo_vs_prioridad()
-# Evolución semanal
+#grafico_barras_prioridad()
+# grafico_lineas_creadas_por_dia()
+# grafico_pastel_estado()
+# grafico_dispersion_tiempo_vs_prioridad()
+# # Evolución semanal
 grafico_lineas_semana_por_prioridad()
 # Legibilidad y contexto
 demo_personalizacion_barras()
