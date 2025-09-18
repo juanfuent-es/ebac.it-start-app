@@ -1,57 +1,94 @@
-import requests
-import pandas as pd
+# Importamos las librerías necesarias para el análisis de datos
+import requests  # Para hacer peticiones HTTP a APIs
+import pandas as pd  # Para manipular y analizar datos estructurados
 
-# Paso 1: Cargar datos  
+# PASO 1: CARGAR DATOS DESDE LA API
+# Hacemos una petición GET a la API de nuestra aplicación Flask
 resp = requests.get("http://localhost:5000/api/tareas")
+
+# Usamos try-except para manejar posibles errores de conexión
 try:
+    # Convertimos la respuesta JSON en un diccionario de Python
     datos = resp.json()
+    
+    # Creamos un DataFrame de pandas con los datos obtenidos
+    # Un DataFrame es como una tabla de Excel pero programáticamente
     df = pd.DataFrame(datos)
-    # Cargar datos desde la API
+    
+    # Mostramos información básica sobre los datos cargados
     print("Datos cargados correctamente")
-    print(f"Total de tareas: {len(df)}")
-    print(f"Columnas disponibles: {list(df.columns)}")
+    print(f"Total de tareas: {len(df)}")  # Número total de filas
+    print(f"Columnas disponibles: {list(df.columns)}")  # Nombres de las columnas
 except Exception as e:
+    # Si hay algún error, mostramos el mensaje y una sugerencia
     print(f"Error al cargar datos: {e}")
     print("Sugerencia: Asegúrate de que la aplicación Flask esté ejecutándose en localhost:5000")
+    # Creamos un DataFrame vacío para evitar errores posteriores
     df = pd.DataFrame()
 
 def explorar_datos():
-    """Explora la estructura básica de los datos"""
+    """
+    PASO 2: EXPLORACIÓN INICIAL DE DATOS
+    Esta función nos ayuda a entender la estructura y calidad de nuestros datos
+    """
     print("\nEXPLORACIÓN DE DATOS")
     print("=" * 40)
-    # Primeras filas
+    
+    # Mostramos las primeras 5 filas del DataFrame
+    # Esto nos da una idea de cómo se ven los datos
     print("\nPrimeras 5 filas:")
     print(df.head())
-    # Información de tipos
+    
+    # Verificamos los tipos de datos de cada columna
+    # Es importante saber si las fechas son strings o datetime, etc.
     print("\nTipos de datos:")
     print(df.dtypes)
-    # Valores nulos
+    
+    # Contamos los valores nulos (missing values) en cada columna
+    # Los valores nulos pueden causar problemas en el análisis
     print("\nValores nulos:")
     print(df.isnull().sum())
 
 def limpiar_datos():
-    """Limpia y transforma los datos"""
+    """
+    PASO 3: LIMPIEZA Y TRANSFORMACIÓN DE DATOS
+    Convertimos los datos a los tipos correctos para poder analizarlos
+    """
     print("\nLIMPIEZA DE DATOS")
     print("=" * 40)    
-    # Convertir fechas
+    
+    # CONVERSIÓN DE FECHAS
+    # Convertimos las columnas de fecha de string a datetime
+    # errors='coerce' convierte valores inválidos a NaT (Not a Time)
     df['fecha_creacion'] = pd.to_datetime(df['fecha_creacion'], errors='coerce')
     df['fecha_limite'] = pd.to_datetime(df['fecha_actualizacion'], errors='coerce')
     df['fecha_limite'] = pd.to_datetime(df['fecha_limite'], errors='coerce')
     df['completado_en'] = pd.to_datetime(df['completado_en'], errors='coerce')
+    
+    # CONVERSIÓN DE NÚMEROS
+    # Convertimos tiempo_estimado a numérico para poder hacer cálculos
     df['tiempo_estimado'] = pd.to_numeric(df['tiempo_estimado'], errors='coerce')
+    
+    # Mostramos los tipos de datos después de la conversión
+    print("Tipos de datos después de la limpieza:")
     print(df.dtypes)
 
 def analizar_estados():
-    """Analiza los estados de las tareas"""
+    """
+    PASO 4: ANÁLISIS DE ESTADOS DE LAS TAREAS
+    Analizamos cómo están distribuidas las tareas según su estado
+    """
     print("\nANÁLISIS DE ESTADOS")
     print("=" * 40)
     
+    # Verificamos que la columna 'estado' existe antes de analizarla
     if 'estado' in df.columns:
+        # Contamos cuántas tareas hay en cada estado
         estados = df['estado'].value_counts()
         print("Distribución de estados:")
         print(estados)
         
-        # Porcentajes
+        # Calculamos los porcentajes para entender mejor la distribución
         print("\nPorcentajes:")
         print((estados / len(df) * 100).round(1))
 
