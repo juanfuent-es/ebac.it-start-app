@@ -25,7 +25,6 @@ def limpiar_datos():
     # 
     df['estado'] = df['estado'].str.lower().str.strip()
     print("Texto normalizado a minúsculas en columna 'estado'")
-
 # 1) Gráfico de barras – comparar categorías (prioridad)
 def grafico_barras_prioridad():
     """Muestra cantidad de tareas por prioridad (responde: ¿qué categoría domina?)."""
@@ -37,7 +36,6 @@ def grafico_barras_prioridad():
     plt.grid(axis="y", linestyle="--", alpha=0.4)
     plt.tight_layout()
     plt.show()
-
 # 2) Gráfico de líneas – evolución en el tiempo (tareas creadas por día)
 def grafico_lineas_creadas_por_dia():
     """Evolución diaria de creación (responde: ¿cómo cambia en el tiempo?)."""
@@ -49,7 +47,6 @@ def grafico_lineas_creadas_por_dia():
     plt.grid(True, linestyle="--", alpha=0.9)
     plt.tight_layout()
     plt.show()
-
 # 3) Gráfico de pastel – proporciones por estado
 def grafico_pastel_estado():
     """Distribución de estados (responde: ¿qué proporción ocupa cada estado?)."""
@@ -58,128 +55,111 @@ def grafico_pastel_estado():
     plt.ylabel("")
     plt.tight_layout()
     plt.show()
-
-limpiar_datos()
-grafico_pastel_estado()
-
 # 4) Dispersión – relación entre tiempo estimado y prioridad
 def grafico_dispersion_tiempo_vs_prioridad():
     """Relación entre duración estimada y prioridad (responde: ¿existe correlación?)."""
-    # Si prioridad es categórica, convertirla a códigos para el eje Y
-    prioridad_cods = df["prioridad"] #.astype("category")
-    plt.scatter(df["tiempo_estimado"], prioridad_cods, alpha=0.6)
+    plt.scatter(df["tiempo_estimado"], df["prioridad"], alpha=0.6)
     plt.title("Duración estimada vs Prioridad")
     plt.xlabel("Minutos estimados")
-    plt.ylabel("Prioridad (codificada)")
+    plt.ylabel("Prioridad")
     plt.grid(True, linestyle="--", alpha=0.3)
     plt.tight_layout()
     plt.show()
-
-grafico_dispersion_tiempo_vs_prioridad()
-
-# 5) Evolución semanal con unstack por prioridad
+# 5) Evolución semanal de creación de tareas por prioridad
 def grafico_lineas_semana_por_prioridad():
     """Tareas creadas por semana separadas por prioridad (unstack)."""
-    df_tmp = df.copy()
-    df_tmp["semana"] = df_tmp["fecha_creacion"].dt.isocalendar().week
-    conteo = df_tmp.groupby(["semana", "prioridad"]).size().unstack(fill_value=0)
+    # Usar la fecha de inicio de la semana (lunes) como eje X
+    df["semana_fecha"] = df["fecha_creacion"].dt.to_period('W-MON').apply(lambda p: p.start_time)
+    conteo = df.groupby(["semana_fecha", "prioridad"]).size().unstack(fill_value=0)
+    conteo = conteo.sort_index()
     conteo.plot(kind="line", marker="o")
     plt.title("Tareas creadas por semana y prioridad")
-    plt.xlabel("Semana del año")
+    plt.xlabel("Semana (fecha de inicio)")
     plt.ylabel("Cantidad de tareas")
     plt.grid(True, linestyle="--", alpha=0.4)
     plt.legend(title="Prioridad")
+    plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
 
-
-# 6) Personalización/legibilidad en barras (demostración)
-def demo_personalizacion_barras():
-    """Demuestra cómo pequeñas personalizaciones mejoran la legibilidad."""
-    df["prioridad"].value_counts().sort_values().plot(kind="bar")
-    plt.title("Cantidad de tareas por prioridad")
-    plt.xlabel("Prioridad")
-    plt.ylabel("Cantidad")
-    plt.xticks(rotation=0)
-    plt.grid(axis="y", linestyle="--", alpha=0.5)
+# 6) Análisis de tareas más repetidas cruzadas con estado y fechas
+def graficar_top_tareas_mas_repetidas():
+    """Gráfico de barras con el top 10 de tareas más repetidas."""
+    tareas_repetidas = df['nombre'].value_counts().sort_values(ascending=False).head(10)
+    tareas_repetidas.plot(kind='bar')
+    plt.title('Top 10 Tareas Más Repetidas')
+    plt.xlabel('Nombre de la Tarea')
+    plt.ylabel('Frecuencia')
+    plt.tick_params(axis='x', rotation=45)
+    plt.grid(axis='y', linestyle='--', alpha=0.3)
     plt.tight_layout()
     plt.show()
 
-
-# 7) Agregar contexto mínimo (título, ejes, leyenda opcional)
-def agregar_contexto_minimo():
-    """Ilustra el impacto de título/etiquetas/leyenda en claridad."""
-    df["prioridad"].value_counts().plot(kind="bar")
-    plt.title("Distribución de tareas por prioridad")
-    plt.xlabel("Prioridad")
-    plt.ylabel("Cantidad")
-    plt.legend(["Cantidad de tareas"])  # solo si es necesario
-    plt.xticks(rotation=0)
-    plt.grid(axis="y", linestyle="--", alpha=0.4)
+def graficar_estado_de_top_tareas():
+    """Barras apiladas de estado para las 5 tareas más repetidas."""
+    tareas_top = df['nombre'].value_counts().head(20).index
+    df_top_tareas = df[df['nombre'].isin(tareas_top)]
+    estado_por_tarea = df_top_tareas.groupby(['nombre', 'estado']).size().unstack(fill_value=0)
+    colores = ['#ff9999', '#66b3ff', '#99ff99']
+    estado_por_tarea.plot(kind='bar', stacked=True, color=colores)
+    plt.title('Estado de las 5 Tareas Más Repetidas')
+    plt.xlabel('Nombre de la Tarea')
+    plt.ylabel('Cantidad')
+    plt.tick_params(axis='x', rotation=45)
+    plt.legend(title='Estado')
+    plt.grid(axis='y', linestyle='--', alpha=0.3)
     plt.tight_layout()
     plt.show()
 
-
-# 8) Errores comunes y buenas prácticas (con ejemplos simples)
-def ejemplos_errores_comunes():
-    """Muestra prácticas que afectan la percepción y cómo corregirlas."""
-    if df.empty:
-        print("No hay datos para ejemplos.")
-        return
-    # Categorías desordenadas vs ordenadas
-    plt.figure(figsize=(8, 4))
-    plt.subplot(1, 2, 1)
-    df["prioridad"].value_counts().plot(kind="bar")
-    plt.title("Desordenado")
-    plt.xticks(rotation=90)
-    plt.subplot(1, 2, 2)
-    df["prioridad"].value_counts().sort_values().plot(kind="bar")
-    plt.title("Ordenado por valor")
-    plt.xticks(rotation=90)
+def graficar_evolucion_mensual_top3():
+    """Líneas: evolución mensual de las 3 tareas más repetidas."""
+    df['mes'] = df['fecha_creacion'].dt.to_period('M')
+    top_3_tareas = df['nombre'].value_counts().head(3).index
+    df_top3 = df[df['nombre'].isin(top_3_tareas)]
+    evolucion_temporal = df_top3.groupby(['mes', 'nombre']).size().unstack(fill_value=0)
+    evolucion_temporal.plot(kind='line', marker='o', linewidth=2)
+    plt.title('Evolución Mensual de las 3 Tareas Más Repetidas')
+    plt.xlabel('Mes')
+    plt.ylabel('Cantidad de Tareas')
+    plt.tick_params(axis='x', rotation=45)
+    plt.legend(title='Tarea')
+    plt.grid(True, linestyle='--', alpha=0.3)
     plt.tight_layout()
     plt.show()
 
-    print("Sugerencias:")
-    print("- Usa paletas con buen contraste para mejorar legibilidad.")
-    print("- Evita gráficos de pastel con demasiadas categorías; prefiere barras o agrupa 'Otros'.")
-    print("- Para barras, comienza eje Y en cero salvo justificación clara, para no exagerar diferencias.")
+def graficar_heatmap_categoria_vs_estado():
+    """Heatmap: categoría vs estado para las tareas más repetidas."""
+    tareas_top = df['nombre'].value_counts().head(30).index
+    df_top_tareas = df[df['nombre'].isin(tareas_top)].copy()
+    df_top_tareas['categoria'] = df_top_tareas['categoria'].fillna('Sin categoría')
+    heatmap_data = df_top_tareas.groupby(['categoria', 'estado']).size().unstack(fill_value=0)
+    fig, ax = plt.subplots()
+    im = ax.imshow(heatmap_data.values, cmap='YlOrRd', aspect='auto')
 
-
-# 9) Narrativa visual: pregunta -> filtro -> agrupación -> contexto -> énfasis
-def narrativa_visual_pendientes_resaltado():
-    """Historia visual: ¿qué prioridad concentra más tareas pendientes?"""
-    pendientes = df[df["estado"] == "pendiente"].copy()
-    if pendientes.empty:
-        print("No hay tareas pendientes para mostrar.")
-        return
-    conteo = pendientes["prioridad"].value_counts()
-    # Resaltar la barra máxima
-    colores = ["gray"] * len(conteo)
-    idx_max = conteo.values.argmax()
-    colores[idx_max] = "red"
-    conteo.plot(kind="bar", color=colores)
-    plt.title("Tareas pendientes por prioridad")
-    plt.xlabel("Prioridad")
-    plt.ylabel("Cantidad")
-    plt.grid(axis="y", linestyle="--", alpha=0.4)
-    plt.tight_layout()
+    ax.set_title('Heatmap: Categoría vs Estado\n(Tareas Repetidas)')
+    ax.set_xlabel('Estado')
+    ax.set_ylabel('Categoría')
+    ax.set_xticks(range(len(heatmap_data.columns)))
+    ax.set_xticklabels(heatmap_data.columns, rotation=45, ha='right')
+    ax.set_yticks(range(len(heatmap_data.index)))
+    ax.set_yticklabels(heatmap_data.index)
+    for i in range(len(heatmap_data.index)):
+        for j in range(len(heatmap_data.columns)):
+            ax.text(j, i, heatmap_data.iloc[i, j], ha="center", va="center", color="black", fontweight='bold')
+    fig.colorbar(im, ax=ax, shrink=0.8)
+    fig.tight_layout()
     plt.show()
-
-
-# Preparación y ejecución de demostraciones
+    
 limpiar_datos()
-
 # Visualizaciones base
 #grafico_barras_prioridad()
 # grafico_lineas_creadas_por_dia()
 # grafico_pastel_estado()
 # grafico_dispersion_tiempo_vs_prioridad()
 # # Evolución semanal
-grafico_lineas_semana_por_prioridad()
-# Legibilidad y contexto
-demo_personalizacion_barras()
-agregar_contexto_minimo()
-# Errores comunes
-ejemplos_errores_comunes()
-# Narrativa visual
-narrativa_visual_pendientes_resaltado()
+# grafico_lineas_semana_por_prioridad()
+# Ejecutar análisis de tareas repetidas (cada gráfica puede llamarse de forma independiente)
+# graficar_top_tareas_mas_repetidas()
+# graficar_estado_de_top_tareas()
+# graficar_evolucion_mensual_top3()
+graficar_heatmap_categoria_vs_estado()
