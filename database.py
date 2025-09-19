@@ -2,11 +2,10 @@
 import sqlite3
 import os
 
-# Obtener el nombre de la base de datos según el entorno
 if os.environ.get('ENVIRONMENT') == 'production':
-    DATABASE_NAME = 'tareas_produccion.sqlite'
+    DATABASE_NAME = 'tareas_prod.sqlite'
 else:
-    DATABASE_NAME = 'tareas_local.sqlite'
+    DATABASE_NAME = 'tareas_dev.sqlite'
 
 def connect_db():
     """
