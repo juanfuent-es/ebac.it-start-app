@@ -1,39 +1,34 @@
-// Capa de integración con API JSON para CRUD de Tareas
+/**
+ * =============================================================================
+ * APP.JS - ARCHIVO PRINCIPAL DE JAVASCRIPT
+ * =============================================================================
+ * Este archivo mantiene las funciones básicas de la aplicación.
+ * Las funciones más complejas están en archivos separados:
+ * - funciones-generales.js: Funciones utilitarias generales
+ * - calendario.js: Funciones específicas del calendario
+ * =============================================================================
+ */
 
-async function apiFetch(url, options = {}) {
-  const headers = options.headers || {};
-  if (options.body && !headers['Content-Type']) {
-    headers['Content-Type'] = 'application/json';
-  }
-  const response = await fetch(url, { ...options, headers });
-  if (response.status === 204) {
-    return null;
-  }
-  let data = null;
-  try {
-    data = await response.json();
-  } catch (e) {
-    console.error("Ocurrió un error al parsear el JSON", e);
-    // Ignorar si no hay JSON
-  }
-  if (!response.ok) {
-    const message = (data && (data.error || data.message)) || `Error HTTP ${response.status}`;
-    const err = new Error(message);
-    err.status = response.status;
-    err.data = data;
-    console.error(err);
-    throw err;
-  }
-  return data;
-}
+// Las funciones apiFetch y showFlash ahora están en funciones-generales.js
+// Este archivo se mantiene para compatibilidad hacia atrás
 
+// La función apiFetch ahora está completamente implementada en funciones-generales.js
+// Este archivo se mantiene para compatibilidad hacia atrás
+
+// Función de compatibilidad - redirige a la nueva implementación
 function showFlash(message, category = 'info') {
-  const container = document.querySelector('main.container');
-  if (!container) return;
-  const div = document.createElement('div');
-  div.className = `alert alert-${category} mt-2`;
-  div.setAttribute('role', 'alert');
-  div.textContent = message;
-  container.prepend(div);
-  setTimeout(() => div.remove(), 3500);
+    // Si la nueva función está disponible, usarla
+    if (typeof window.showFlash === 'function') {
+        return window.showFlash(message, category);
+    }
+    
+    // Implementación básica de respaldo
+    const container = document.querySelector('main.container');
+    if (!container) return;
+    const div = document.createElement('div');
+    div.className = `alert alert-${category} mt-2`;
+    div.setAttribute('role', 'alert');
+    div.textContent = message;
+    container.prepend(div);
+    setTimeout(() => div.remove(), 3500);
 }
