@@ -29,6 +29,7 @@ def requires_auth(f):
             if not auth or auth.username != username or auth.password != password:
                 return Response('Acceso denegado', 401, {'WWW-Authenticate': 'Basic realm="Login"'})
         return f(*args, **kwargs)
+    decorated.__name__ = f.__name__
     return decorated
 
 init_db()
