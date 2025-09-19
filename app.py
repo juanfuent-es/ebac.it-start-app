@@ -263,3 +263,13 @@ def tareas_filtradas(filtro):
     filas = Tarea.get_all()
     # Filtramos por nombre conteniendo el filtro (insensible a mayúsculas)
     return render_template("tareas.html", tarea=filas)
+
+# =============================================================================
+# CONFIGURACIÓN PARA DESPLIEGUE CON GUNICORN
+# =============================================================================
+# Esta variable es requerida por Gunicorn cuando despliega la aplicación
+application = app
+
+if __name__ == "__main__":
+    # Solo ejecutar en modo desarrollo
+    app.run(debug=True)
