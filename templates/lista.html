@@ -1,0 +1,125 @@
+<!-- =============================================================================
+     TEMPLATE: LISTA DE TAREAS
+     =============================================================================
+     Esta página muestra todas las tareas en formato de lista
+     ============================================================================= -->
+{% extends "layout.html" %}
+
+{% block title %}Lista de Tareas{% endblock %}
+
+{% block content %}
+<section class="container mt-4" id="tareas">
+  <header>
+    <h1>Lista de Tareas</h1>
+    <p>Estas son las tareas que tienes que hacer:</p>
+  </header>
+  
+  <a href="/" class="btn btn-outline-primary mb-3" title="Ver Calendario">
+    <i class="bi bi-calendar3 me-1"></i>
+    Ver Calendario
+  </a>
+  
+  <!-- CONDICIONAL: Verificamos si hay tareas para mostrar -->
+  {% if tareas %}
+  <!-- Si hay tareas, las mostramos en una lista -->
+  <div class="list-group">
+    <!-- BUCLE: Iteramos sobre cada tarea en la lista -->
+    {% for tarea in tareas %}
+    <!-- list-group-item = Cada elemento de la lista -->
+    <div class="list-group-item d-flex justify-content-between align-items-center {{ 'list-group-item-success' if tarea.estado == 'completada' else 'list-group-item-warning' }}">
+      <!-- Mostramos el nombre de la tarea -->
+      <div class="d-flex flex-column">
+        <a href="/tarea/{{ tarea.id }}" class="text-decoration-none">
+          <span class="fw-semibold">{{ tarea.nombre }}</span>
+        </a>
+        <div class="d-flex gap-2 mt-1">
+          <!-- Badge de prioridad -->
+          <span class="badge badge-sm 
+            {% if tarea.prioridad == 'alta' %}bg-danger
+            {% elif tarea.prioridad == 'media' %}bg-warning
+            {% else %}bg-info{% endif %}">
+            {{ tarea.prioridad|title }}
+          </span>
+          <!-- Fecha límite -->
+          {% if tarea.fecha_limite %}
+          <small class="text-muted">
+            <i class="bi bi-calendar-event me-1"></i>
+            {% if 'T' in tarea.fecha_limite %}
+              {{ tarea.fecha_limite.replace('T', ' ') }}
+            {% else %}
+              {{ tarea.fecha_limite }}
+            {% endif %}
+          </small>
+          {% endif %}
+          <!-- Tiempo estimado -->
+          {% if tarea.tiempo_estimado %}
+          <small class="text-muted">
+            <i class="bi bi-clock me-1"></i>
+            {{ tarea.tiempo_estimado }}min
+          </small>
+          {% endif %}
+        </div>
+      </div>
+      <!-- Grupo de botones para cada tarea -->
+      <div class="btn-group" role="group">
+        <!-- Botón Editar -->
+        <a href="/editar/{{ tarea.id }}" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-pencil-square me-1"></i>
+          Editar
+        </a>
+        <!-- Botón Alternar Estado -->
+        <button class="btn btn-sm {{ 'btn-outline-success' if tarea.estado == 'completada' else 'btn-outline-warning' }} toggle-estado" data-id="{{ tarea.id }}">
+          <i class="bi bi-{{ 'arrow-counterclockwise' if tarea.estado == 'completada' else 'check-circle' }} me-1"></i>
+          {{ 'Reabrir' if tarea.estado == 'completada' else 'Completar' }}
+        </button>
+        <!-- Botón Eliminar -->
+        <a href="/eliminar/{{ tarea.id }}" class="btn btn-sm btn-outline-danger delete-tarea" data-id="{{ tarea.id }}">
+          <i class="bi bi-trash me-1"></i>
+          Eliminar
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <!-- Si no hay tareas, mostramos un mensaje -->
+  <div class="alert alert-warning">
+    No hay tareas pendientes. ¡Agrega una nueva tarea!
+  </div>
+  {% endif %}
+</section>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Manejar eliminación de tareas
+    document.querySelectorAll('.delete-tarea').forEach((link) => {
+      link.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        const id = link.getAttribute('data-id');
+        const ok = window.confirm('¿Estás seguro de que quieres eliminar esta tarea?');
+        if (!ok) return;
+        try {
+          await apiFetch(`/api/tarea/${id}`, { method: 'DELETE' });
+          window.location.href = '/lista';
+        } catch (err) {
+          showFlash(err.message || 'No se pudo eliminar la tarea', 'danger');
+        }
+      });
+    });
+
+    // Manejar alternar estado de tareas
+    document.querySelectorAll('.toggle-estado').forEach((button) => {
+      button.addEventListener('click', async (ev) => {
+        ev.preventDefault();
+        const id = button.getAttribute('data-id');
+        try {
+          const response = await apiFetch(`/api/tarea/${id}/toggle-estado`, { method: 'POST' });
+          window.location.href = '/lista';
+        } catch (err) {
+          showFlash(err.message || 'No se pudo cambiar el estado de la tarea', 'danger');
+        }
+      });
+    });
+  });
+</script>
+{% endblock %}
