@@ -39,23 +39,19 @@
       <div class="modal-body">
         <form id="eventoForm">
           <input type="hidden" id="eventoId" name="id">
-          <div class="mb-3">
-            <label for="eventoNombre" class="form-label">Nombre de la tarea *</label>
-            <input type="text" class="form-control" id="eventoNombre" name="nombre" required>
-          </div>
-          <div class="mb-3">
-            <label for="eventoCategoria" class="form-label">Categoría *</label>
-            <input type="text" class="form-control" id="eventoCategoria" name="categoria" required>
-            <div class="form-text">Ejemplos: trabajo, personal, estudio, etc.</div>
-          </div>
           <div class="row">
             <div class="col-md-6">
-              <div class="mb-3">
-                <label for="eventoFechaInicio" class="form-label">Fecha de inicio</label>
-                <input type="datetime-local" class="form-control" id="eventoFechaInicio" name="fecha_inicio">
-              </div>
+              <label for="eventoNombre" class="form-label">Nombre de la tarea *</label>
+              <input type="text" class="form-control" id="eventoNombre" name="nombre" required>
             </div>
             <div class="col-md-6">
+              <label for="eventoCategoria" class="form-label">Categoría *</label>
+              <input type="text" id="eventoCategoria" name="categoria" required>
+              <div class="form-text">Ejemplos: trabajo, personal, estudio, etc.</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
               <div class="mb-3">
                 <label for="eventoFechaLimite" class="form-label">Fecha límite</label>
                 <input type="datetime-local" class="form-control" id="eventoFechaLimite" name="fecha_limite">
@@ -133,7 +129,6 @@
     </div>
   </div>
 </div>
-
 <!-- Modal de confirmación para eliminar -->
 <div class="modal fade" id="eliminarModal" tabindex="-1" aria-labelledby="eliminarModalLabel" aria-hidden="true">
   <div class="modal-dialog">
@@ -152,10 +147,4 @@
     </div>
   </div>
 </div>
-<!-- Incluir FullCalendar CSS -->
-<link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
-<!-- Incluir FullCalendar JS -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
-<!-- Incluir archivo JavaScript del calendario -->
-<script src="/static/calendario.js"></script>
 {% endblock %}

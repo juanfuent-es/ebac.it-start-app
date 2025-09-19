@@ -94,6 +94,19 @@ function crearEvento(tarea) {
     };
 }
 
+var el = document.getElementById('eventoCategoria');
+if (el) {
+    new TomSelect(el, {
+    create: function(input) {
+        // Devuelve un objeto con value/label para crear una nueva categoría
+        return { value: input, text: input };
+    },
+    createOnBlur: true,
+    persist: false,
+    allowEmptyOption: true,
+    placeholder: 'Selecciona o crea una categoría'
+    });
+}
 /**
  * Carga las tareas desde el servidor
  */
@@ -190,13 +203,12 @@ function inicializarCalendario() {
  * Crea una nueva tarea
  */
 function crearNuevaTarea(fecha = null) {
-    alert('crearNuevaTarea');
     eventoSeleccionado = null;
     document.getElementById('eventoModalLabel').textContent = 'Nueva Tarea';
     document.getElementById('eventoForm').reset();
     
     if (fecha) {
-        document.getElementById('eventoFechaInicio').value = fecha + 'T09:00';
+        document.getElementById('eventoFechaLimite').value = fecha + 'T09:00';
     }
     
     const modal = new bootstrap.Modal(document.getElementById('eventoModal'));
