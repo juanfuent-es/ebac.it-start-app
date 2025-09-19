@@ -1,7 +1,12 @@
 # database.py
 import sqlite3
+import os
 
-DATABASE_NAME = "tareas.sqlite"
+# Obtener el nombre de la base de datos según el entorno
+if os.environ.get('ENVIRONMENT') == 'production':
+    DATABASE_NAME = 'tareas_produccion.sqlite'
+else:
+    DATABASE_NAME = 'tareas_local.sqlite'
 
 def connect_db():
     """
@@ -10,7 +15,7 @@ def connect_db():
     conn = sqlite3.connect(DATABASE_NAME) # Conecta a la base de datos
     conn.row_factory = sqlite3.Row  # Devuelve filas tipo Row: acceso por índice y por llave
     conn.execute("PRAGMA foreign_keys = ON") # Activa el modo de clave foránea
-    # print(" * Conectado a la base de datos")
+    print(f" * Conectado a: {DATABASE_NAME}")
     return conn
 
 # Función para inicializar la base 
