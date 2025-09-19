@@ -21,7 +21,7 @@
       <a href="/lista" class="btn btn-outline-secondary me-2">
         <i class="bi bi-list-ul me-1"></i>Vista Lista
       </a>
-      <button class="btn btn-primary" onclick="abrirModalCrearEvento()">
+      <button class="btn btn-primary" onclick="crearNuevaTarea()">
         <i class="bi bi-plus-lg me-1"></i>Nueva Tarea
       </button>
     </div>
@@ -97,25 +97,43 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-primary" onclick="guardarEvento()">Guardar Tarea</button>
+        <button type="button" class="btn btn-primary" onclick="guardarTarea()">Guardar Tarea</button>
       </div>
     </div>
   </div>
 </div>
-<!-- Modal de confirmación para eliminar -->
-<div class="modal fade" id="eliminarModal" tabindex="-1" aria-labelledby="eliminarModalLabel" aria-hidden="true">
+<!-- Modal de acciones para eventos -->
+<div class="modal fade" id="accionesModal" tabindex="-1" aria-labelledby="accionesModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="eliminarModalLabel">Confirmar eliminación</h5>
+        <h5 class="modal-title" id="accionesModalLabel">Acciones de la Tarea</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        ¿Estás seguro de que quieres eliminar esta tarea?
+        <div class="mb-3">
+          <h6>Información de la tarea:</h6>
+          <p><strong>Nombre:</strong>
+            <span id="eventoInfoNombre"></span></p>
+          <p><strong>Categoría:</strong>
+            <span id="eventoInfoCategoria"></span></p>
+          <p><strong>Prioridad:</strong>
+            <span id="eventoInfoPrioridad"></span></p>
+          <p><strong>Estado:</strong>
+            <span id="eventoInfoEstado"></span></p>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-danger" onclick="confirmarEliminacion()">Eliminar</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        <button type="button" class="btn btn-primary" onclick="editarTarea()">
+          <i class="bi bi-pencil-square me-1"></i>Editar
+        </button>
+        <button type="button" class="btn btn-warning" onclick="alternarEstado()">
+          <i class="bi bi-check-circle me-1"></i>Cambiar Estado
+        </button>
+        <button type="button" class="btn btn-danger" onclick="eliminarTareaCalendario()">
+          <i class="bi bi-trash me-1"></i>Eliminar
+        </button>
       </div>
     </div>
   </div>

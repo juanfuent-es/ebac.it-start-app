@@ -9,26 +9,17 @@
  * =============================================================================
  */
 
-// Las funciones apiFetch y showFlash ahora están en funciones-generales.js
-// Este archivo se mantiene para compatibilidad hacia atrás
+/**
+ * =============================================================================
+ * APP.JS - ARCHIVO PRINCIPAL DE JAVASCRIPT
+ * =============================================================================
+ * Este archivo se mantiene para compatibilidad hacia atrás.
+ * Las funciones principales están ahora en:
+ * - funciones-generales.js: Funciones utilitarias generales
+ * - calendario.js: Funciones específicas del calendario
+ * - tareas.js: Funciones de API para tareas
+ * =============================================================================
+ */
 
-// La función apiFetch ahora está completamente implementada en funciones-generales.js
+// Las funciones apiFetch y showFlash están implementadas en funciones-generales.js
 // Este archivo se mantiene para compatibilidad hacia atrás
-
-// Función de compatibilidad - redirige a la nueva implementación
-function showFlash(message, category = 'info') {
-    // Si la nueva función está disponible, usarla
-    if (typeof window.showFlash === 'function') {
-        return window.showFlash(message, category);
-    }
-    
-    // Implementación básica de respaldo
-    const container = document.querySelector('main.container');
-    if (!container) return;
-    const div = document.createElement('div');
-    div.className = `alert alert-${category} mt-2`;
-    div.setAttribute('role', 'alert');
-    div.textContent = message;
-    container.prepend(div);
-    setTimeout(() => div.remove(), 3500);
-}

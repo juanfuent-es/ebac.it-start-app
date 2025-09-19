@@ -1,124 +1,115 @@
 /**
  * =============================================================================
- * CALENDARIO.JS - FUNCIONES PARA EL CALENDARIO DE TAREAS
+ * CALENDARIO.JS - CALENDARIO SIMPLE PARA PRINCIPIANTES
  * =============================================================================
- * Este archivo contiene todas las funciones JavaScript necesarias para manejar
- * el calendario de tareas con FullCalendar. Incluye:
- * - Inicialización del calendario
- * - Transformación de datos JSON a eventos de FullCalendar
- * - Manejo de eventos (crear, editar, eliminar)
- * - Funciones de utilidad para colores y fechas
+ * Este archivo contiene las funciones básicas para manejar el calendario
+ * de tareas. Diseñado para ser fácil de entender y modificar.
  * =============================================================================
  */
 
-// =============================================================================
-// VARIABLES GLOBALES
-// =============================================================================
+// Variables globales
 let calendar;
-let eventoActual = null;
-let eventoAEliminar = null;
+let eventoSeleccionado = null;
 
 // =============================================================================
 // FUNCIONES DE UTILIDAD
 // =============================================================================
 
 /**
- * Obtiene el color correspondiente a la prioridad de una tarea
- * @param {string} prioridad - Prioridad de la tarea (alta, media, baja)
- * @returns {string} Color hexadecimal
+ * Obtiene el color según la prioridad de la tarea
  */
-function getColorPrioridad(prioridad) {
+function obtenerColor(prioridad) {
     const colores = {
         "alta": "#dc3545",    // Rojo
-        "media": "#ffc107",   // Amarillo
+        "media": "#ffc107",   // Amarillo  
         "baja": "#28a745"     // Verde
     };
     return colores[prioridad] || "#007bff"; // Azul por defecto
 }
 
 /**
- * Obtiene el color de texto según la prioridad
- * @param {string} prioridad - Prioridad de la tarea
- * @returns {string} Color de texto
+ * Convierte una tarea en un evento del calendario
  */
-function getTextColorPrioridad(prioridad) {
-    return prioridad === "media" ? "#000000" : "#ffffff";
-}
-
-/**
- * Transforma una tarea del JSON en un evento de FullCalendar
- * @param {Object} tarea - Objeto tarea del servidor
- * @returns {Object} Evento formateado para FullCalendar
- */
-function transformarTareaAEvento(tarea) {
-    // Determinar la fecha de inicio para el evento
-    // Si tiene fecha_limite, usar esa fecha; sino usar fecha_creacion
-    const fechaInicio = tarea.fecha_limite || tarea.fecha_creacion;
+function crearEvento(tarea) {
+    // Determinar qué fecha usar y formatearla correctamente
+    let fecha;
     
-    // Crear título informativo
-    const titulo = tarea.fecha_limite 
-        ? `${tarea.nombre} (Con fecha límite)`
-        : `${tarea.nombre} (Sin fecha límite)`;
-    
-    // Configurar colores según prioridad
-    let backgroundColor = getColorPrioridad(tarea.prioridad);
-    let borderColor = getColorPrioridad(tarea.prioridad);
-    let textColor = getTextColorPrioridad(tarea.prioridad);
-    
-    // Si la tarea está completada, cambiar a gris
-    if (tarea.estado === "completada") {
-        backgroundColor = "#6c757d";
-        borderColor = "#6c757d";
-        textColor = "#ffffff";
+    if (tarea.completado_en) {
+        // Si está completada, usar la fecha de completado
+        fecha = tarea.completado_en;
+    } else if (tarea.fecha_limite) {
+        // Si tiene fecha límite, usarla
+        fecha = tarea.fecha_limite;
+        // Asegurar que tenga formato completo de fecha
+        if (!fecha.includes('T')) {
+            fecha = fecha + 'T09:00:00';
+        } else if (!fecha.includes(':')) {
+            fecha = fecha + ':00';
+        }
+        // Si la fecha límite está en el futuro, usar fecha de creación en su lugar
+        const fechaLimite = new Date(fecha);
+        const hoy = new Date();
+        if (fechaLimite > hoy) {
+            console.log(`DEBUG: Fecha límite ${fecha} está en el futuro, usando fecha de creación`);
+            fecha = tarea.fecha_creacion;
+        }
+    } else {
+        // Usar fecha de creación como último recurso
+        fecha = tarea.fecha_creacion;
     }
+    
+    // Crear título simple
+    const titulo = tarea.nombre;
+    
+    // Color según prioridad
+    let color = obtenerColor(tarea.prioridad);
+    
+    // Si está completada, usar gris
+    if (tarea.estado === "completada") {
+        color = "#6c757d";
+    }
+    
+    console.log(`DEBUG: Creando evento para tarea ${tarea.id}:`, {
+        nombre: tarea.nombre,
+        fecha: fecha,
+        estado: tarea.estado
+    });
     
     return {
         id: tarea.id,
         title: titulo,
-        start: fechaInicio,
-        allDay: true,
-        backgroundColor: backgroundColor,
-        borderColor: borderColor,
-        textColor: textColor,
+        start: fecha,
+        allDay: false, // Mostrar por hora
+        backgroundColor: color,
+        borderColor: color,
+        textColor: "#ffffff",
         extendedProps: {
             categoria: tarea.categoria,
             prioridad: tarea.prioridad,
             estado: tarea.estado,
             tiempo_estimado: tarea.tiempo_estimado,
             fecha_limite: tarea.fecha_limite,
-            completado_en: tarea.completado_en,
-            nombre_original: tarea.nombre // Guardar nombre original sin modificaciones
+            nombre_original: tarea.nombre
         }
     };
 }
 
 /**
- * Carga las tareas desde el servidor y las transforma en eventos del calendario
- * @returns {Promise<Array>} Array de eventos para FullCalendar
+ * Carga las tareas desde el servidor
  */
-async function cargarEventosDelServidor() {
+async function cargarTareas() {
     try {
-        console.log('DEBUG: Cargando tareas desde el servidor...');
+        console.log('DEBUG: Cargando tareas desde /api/tareas');
         const response = await apiFetch('/api/tareas');
+        console.log('DEBUG: Respuesta de API:', response);
         
-        if (!Array.isArray(response)) {
-            throw new Error('Respuesta del servidor no es un array');
-        }
+        const eventos = response.map(tarea => crearEvento(tarea));
+        console.log('DEBUG: Eventos creados:', eventos);
         
-        console.log(`DEBUG: Se recibieron ${response.length} tareas del servidor`);
-        
-        // Transformar cada tarea en un evento de FullCalendar
-        const eventos = response.map(tarea => {
-            console.log(`DEBUG: Transformando tarea ${tarea.id}: "${tarea.nombre}"`);
-            return transformarTareaAEvento(tarea);
-        });
-        
-        console.log(`DEBUG: Se transformaron ${eventos.length} eventos para FullCalendar`);
         return eventos;
-        
     } catch (error) {
-        console.error('ERROR: No se pudieron cargar las tareas:', error);
-        showFlash('Error al cargar las tareas del calendario', 'danger');
+        console.error('Error al cargar tareas:', error);
+        showFlash('Error al cargar las tareas', 'danger');
         return [];
     }
 }
@@ -128,22 +119,21 @@ async function cargarEventosDelServidor() {
 // =============================================================================
 
 /**
- * Inicializa el calendario FullCalendar
+ * Inicializa el calendario
  */
 function inicializarCalendario() {
     const calendarEl = document.getElementById('calendar');
     
     if (!calendarEl) {
-        console.error('ERROR: No se encontró el elemento #calendar');
+        console.error('No se encontró el elemento #calendar');
         return;
     }
     
-    console.log('DEBUG: Inicializando FullCalendar...');
-    
     calendar = new FullCalendar.Calendar(calendarEl, {
-        // Configuración básica
-        initialView: 'dayGridMonth',
+        // Vista inicial
+        initialView: 'timeGridWeek',
         locale: 'es',
+        initialDate: '2025-09-18', // Mostrar la fecha de las tareas
         
         // Barra de herramientas
         headerToolbar: {
@@ -152,63 +142,44 @@ function inicializarCalendario() {
             right: 'dayGridMonth,timeGridWeek,timeGridDay'
         },
         
-        // Cargar eventos usando función personalizada
+        // Cargar eventos
         events: async function(info, successCallback, failureCallback) {
             try {
-                const eventos = await cargarEventosDelServidor();
+                console.log('DEBUG: FullCalendar solicitando eventos para rango:', info.start, 'a', info.end);
+                const eventos = await cargarTareas();
+                console.log('DEBUG: Enviando eventos a FullCalendar:', eventos);
                 successCallback(eventos);
             } catch (error) {
-                console.error('ERROR: Fallo al cargar eventos:', error);
+                console.error('Error al cargar eventos:', error);
                 failureCallback(error);
             }
         },
         
-        // Formato de tiempo
+        // Configuración de tiempo
+        slotMinTime: '08:00:00',
+        slotMaxTime: '20:00:00',
+        slotDuration: '01:00:00',
         eventTimeFormat: {
             hour: '2-digit',
             minute: '2-digit',
             hour12: false
         },
         
-        // Configuración de eventos
-        eventDisplay: 'block',
-        eventColor: '#007bff',
-        eventTextColor: '#ffffff',
+        // Interacciones
         selectable: true,
-        selectMirror: true,
-        selectOverlap: false,
         editable: true,
-        droppable: true,
         
-        // Eventos del calendario
+        // Eventos
         eventClick: function(info) {
-            mostrarMenuEvento(info.event, info.jsEvent);
+            mostrarModalEvento(info.event);
         },
         
         dateClick: function(info) {
-            abrirModalCrearEvento(info.dateStr);
-        },
-        
-        eventDrop: function(info) {
-            actualizarFechasEvento(info.event);
-        },
-        
-        eventResize: function(info) {
-            actualizarFechasEvento(info.event);
-        },
-        
-        // Personalizar apariencia de eventos
-        eventDidMount: function(info) {
-            // El color ya está configurado en transformarTareaAEvento
-            // Solo agregar tooltip con información adicional
-            const prioridad = info.event.extendedProps.prioridad;
-            const categoria = info.event.extendedProps.categoria;
-            info.el.title = `${info.event.title}\nCategoría: ${categoria}\nPrioridad: ${prioridad || 'Sin especificar'}`;
+            crearNuevaTarea(info.dateStr);
         }
     });
     
     calendar.render();
-    console.log('DEBUG: FullCalendar inicializado correctamente');
 }
 
 // =============================================================================
@@ -216,11 +187,11 @@ function inicializarCalendario() {
 // =============================================================================
 
 /**
- * Abre el modal para crear un nuevo evento
- * @param {string} fecha - Fecha en formato YYYY-MM-DD (opcional)
+ * Crea una nueva tarea
  */
-function abrirModalCrearEvento(fecha = null) {
-    eventoActual = null;
+function crearNuevaTarea(fecha = null) {
+    alert('crearNuevaTarea');
+    eventoSeleccionado = null;
     document.getElementById('eventoModalLabel').textContent = 'Nueva Tarea';
     document.getElementById('eventoForm').reset();
     
@@ -233,57 +204,31 @@ function abrirModalCrearEvento(fecha = null) {
 }
 
 /**
- * Abre el modal para editar un evento existente
- * @param {Object} evento - Evento de FullCalendar a editar
+ * Muestra el modal con las acciones del evento
  */
-function abrirModalEditarEvento(evento) {
-    eventoActual = evento;
-    document.getElementById('eventoModalLabel').textContent = 'Editar Tarea';
+function mostrarModalEvento(evento) {
+    eventoSeleccionado = evento;
     
-    // Llenar formulario con datos del evento
-    document.getElementById('eventoId').value = evento.id;
-    document.getElementById('eventoNombre').value = evento.extendedProps.nombre_original;
-    document.getElementById('eventoCategoria').value = evento.extendedProps.categoria || '';
-    document.getElementById('eventoPrioridad').value = evento.extendedProps.prioridad || '';
-    document.getElementById('eventoTiempoEstimado').value = evento.extendedProps.tiempo_estimado || '';
-    document.getElementById('eventoEstado').value = evento.extendedProps.estado || 'pendiente';
+    // Llenar información del evento
+    document.getElementById('eventoInfoNombre').textContent = evento.title;
+    document.getElementById('eventoInfoCategoria').textContent = evento.extendedProps.categoria || 'Sin categoría';
+    document.getElementById('eventoInfoPrioridad').textContent = evento.extendedProps.prioridad || 'Sin prioridad';
+    document.getElementById('eventoInfoEstado').textContent = evento.extendedProps.estado || 'pendiente';
     
-    // Formatear fechas para datetime-local
-    if (evento.start) {
-        const fechaInicio = new Date(evento.start);
-        if (!evento.allDay) {
-            fechaInicio.setMinutes(fechaInicio.getMinutes() - fechaInicio.getTimezoneOffset());
-            document.getElementById('eventoFechaInicio').value = fechaInicio.toISOString().slice(0, 16);
-        } else {
-            document.getElementById('eventoFechaInicio').value = fechaInicio.toISOString().slice(0, 10) + 'T09:00';
-        }
-    }
-    
-    if (evento.extendedProps.fecha_limite) {
-        const fechaLimite = new Date(evento.extendedProps.fecha_limite);
-        fechaLimite.setMinutes(fechaLimite.getMinutes() - fechaLimite.getTimezoneOffset());
-        document.getElementById('eventoFechaLimite').value = fechaLimite.toISOString().slice(0, 16);
-    }
-    
-    const modal = new bootstrap.Modal(document.getElementById('eventoModal'));
+    // Mostrar modal
+    const modal = new bootstrap.Modal(document.getElementById('accionesModal'));
     modal.show();
 }
 
 // =============================================================================
-// FUNCIONES DE CRUD (CREAR, LEER, ACTUALIZAR, ELIMINAR)
+// FUNCIONES DE ACCIONES
 // =============================================================================
 
 /**
- * Guarda un evento (crear nuevo o actualizar existente)
+ * Guarda una nueva tarea
  */
-async function guardarEvento() {
+async function guardarTarea() {
     const form = document.getElementById('eventoForm');
-    
-    // Validar formulario antes de enviar
-    if (!validarFormularioTarea(form)) {
-        return;
-    }
-    
     const formData = new FormData(form);
     
     const datos = {
@@ -296,162 +241,88 @@ async function guardarEvento() {
     };
     
     try {
-        let response;
-        if (eventoActual) {
-            // Actualizar evento existente
-            console.log(`DEBUG: Actualizando tarea ${eventoActual.id}`);
-            response = await actualizarTarea(eventoActual.id, datos);
-        } else {
-            // Crear nuevo evento
-            console.log('DEBUG: Creando nueva tarea');
-            response = await crearTarea(datos);
-        }
-        
-        // Cerrar modal y recargar calendario
+        await crearTarea(datos);
         bootstrap.Modal.getInstance(document.getElementById('eventoModal')).hide();
         calendar.refetchEvents();
-        
     } catch (error) {
-        console.error('ERROR: Fallo al guardar tarea:', error);
-        // El error ya se mostró en las funciones específicas
+        console.error('Error al guardar tarea:', error);
     }
 }
 
 /**
- * Actualiza las fechas de un evento cuando se arrastra o redimensiona
- * @param {Object} evento - Evento de FullCalendar
+ * Edita una tarea existente
  */
-async function actualizarFechasEvento(evento) {
-    const datos = {
-        nombre: evento.extendedProps.nombre_original,
-        categoria: evento.extendedProps.categoria,
-        fecha_limite: evento.end ? evento.end.toISOString() : evento.start.toISOString(),
-        prioridad: evento.extendedProps.prioridad,
-        tiempo_estimado: evento.extendedProps.tiempo_estimado
-    };
+function editarTarea() {
+    if (!eventoSeleccionado) return;
     
-    try {
-        console.log(`DEBUG: Actualizando fechas de tarea ${evento.id}`);
-        await actualizarTarea(evento.id, datos);
-    } catch (error) {
-        console.error('ERROR: Fallo al actualizar fechas:', error);
-        calendar.refetchEvents(); // Recargar para revertir cambios
-    }
-}
-
-/**
- * Elimina un evento (con confirmación)
- * @param {Object} evento - Evento de FullCalendar a eliminar
- */
-function eliminarEvento(evento) {
-    eventoAEliminar = evento;
-    const modal = new bootstrap.Modal(document.getElementById('eliminarModal'));
+    // Llenar formulario con datos del evento
+    document.getElementById('eventoId').value = eventoSeleccionado.id;
+    document.getElementById('eventoNombre').value = eventoSeleccionado.extendedProps.nombre_original;
+    document.getElementById('eventoCategoria').value = eventoSeleccionado.extendedProps.categoria || '';
+    document.getElementById('eventoPrioridad').value = eventoSeleccionado.extendedProps.prioridad || '';
+    document.getElementById('eventoTiempoEstimado').value = eventoSeleccionado.extendedProps.tiempo_estimado || '';
+    document.getElementById('eventoEstado').value = eventoSeleccionado.extendedProps.estado || 'pendiente';
+    
+    // Cerrar modal de acciones y abrir modal de edición
+    bootstrap.Modal.getInstance(document.getElementById('accionesModal')).hide();
+    const modal = new bootstrap.Modal(document.getElementById('eventoModal'));
     modal.show();
 }
 
 /**
- * Confirma la eliminación de un evento
+ * Alterna el estado de la tarea
+ */
+async function alternarEstado() {
+    if (!eventoSeleccionado) return;
+    
+    try {
+        await alternarEstadoTarea(eventoSeleccionado.id);
+        bootstrap.Modal.getInstance(document.getElementById('accionesModal')).hide();
+        calendar.refetchEvents();
+    } catch (error) {
+        console.error('Error al cambiar estado:', error);
+    }
+}
+
+/**
+ * Elimina una tarea
+ */
+async function eliminarTareaCalendario() {
+    if (!eventoSeleccionado) return;
+    
+    if (confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+        try {
+            await eliminarTarea(eventoSeleccionado.id);
+            bootstrap.Modal.getInstance(document.getElementById('accionesModal')).hide();
+            calendar.refetchEvents();
+        } catch (error) {
+            console.error('Error al eliminar tarea:', error);
+        }
+    }
+}
+
+/**
+ * Confirma la eliminación de una tarea (para modal de confirmación)
  */
 async function confirmarEliminacion() {
-    if (!eventoAEliminar) return;
+    if (!eventoSeleccionado) return;
     
     try {
-        console.log(`DEBUG: Eliminando tarea ${eventoAEliminar.id}`);
-        await eliminarTarea(eventoAEliminar.id);
-        
-        bootstrap.Modal.getInstance(document.getElementById('eliminarModal')).hide();
+        await eliminarTarea(eventoSeleccionado.id);
+        bootstrap.Modal.getInstance(document.getElementById('accionesModal')).hide();
         calendar.refetchEvents();
-        eventoAEliminar = null;
-        
     } catch (error) {
-        console.error('ERROR: Fallo al eliminar tarea:', error);
-        // El error ya se mostró en la función eliminarTarea
-    }
-}
-
-/**
- * Alterna el estado de un evento entre pendiente y completada
- * @param {Object} evento - Evento de FullCalendar
- */
-async function alternarEstadoEvento(evento) {
-    try {
-        console.log(`DEBUG: Alternando estado de tarea ${evento.id}`);
-        await alternarEstadoTarea(evento.id);
-        calendar.refetchEvents();
-        
-    } catch (error) {
-        console.error('ERROR: Fallo al cambiar estado:', error);
-        // El error ya se mostró en la función alternarEstadoTarea
+        console.error('Error al eliminar tarea:', error);
     }
 }
 
 // =============================================================================
-// FUNCIONES DE INTERFAZ DE USUARIO
+// INICIALIZACIÓN
 // =============================================================================
 
 /**
- * Muestra un menú contextual para eventos con opciones de edición
- * @param {Object} evento - Evento de FullCalendar
- * @param {Event} jsEvent - Evento JavaScript del click
- */
-function mostrarMenuEvento(evento, jsEvent) {
-    const menu = document.createElement('div');
-    menu.className = 'dropdown-menu show position-absolute';
-    menu.style.left = jsEvent.pageX + 'px';
-    menu.style.top = jsEvent.pageY + 'px';
-    menu.style.zIndex = '9999';
-    
-    const opciones = [
-        { 
-            text: 'Editar', 
-            icon: 'bi-pencil-square', 
-            action: () => abrirModalEditarEvento(evento) 
-        },
-        { 
-            text: 'Alternar Estado', 
-            icon: 'bi-check-circle', 
-            action: () => alternarEstadoEvento(evento) 
-        },
-        { 
-            text: 'Eliminar', 
-            icon: 'bi-trash', 
-            action: () => eliminarEvento(evento), 
-            class: 'text-danger' 
-        }
-    ];
-    
-    opciones.forEach(opcion => {
-        const item = document.createElement('a');
-        item.className = `dropdown-item ${opcion.class || ''}`;
-        item.href = '#';
-        item.innerHTML = `<i class="${opcion.icon} me-2"></i>${opcion.text}`;
-        item.onclick = (e) => {
-            e.preventDefault();
-            opcion.action();
-            menu.remove();
-        };
-        menu.appendChild(item);
-    });
-    
-    document.body.appendChild(menu);
-    
-    // Cerrar menú al hacer clic fuera
-    setTimeout(() => {
-        document.addEventListener('click', function cerrarMenu() {
-            menu.remove();
-            document.removeEventListener('click', cerrarMenu);
-        });
-    }, 100);
-}
-
-// =============================================================================
-// INICIALIZACIÓN CUANDO EL DOM ESTÉ LISTO
-// =============================================================================
-
-/**
- * Inicializa el calendario cuando el DOM esté completamente cargado
+ * Inicializa el calendario cuando el DOM esté listo
  */
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DEBUG: DOM cargado, inicializando calendario...');
     inicializarCalendario();
 });

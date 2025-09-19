@@ -40,20 +40,13 @@ init_db()
 # =============================================================================
 @app.route('/api/tareas', methods=["GET"])
 def api_tareas_index():
+    """API que devuelve todas las tareas en formato JSON limpio"""
     registros = Tarea.get_all()
     categorias = { cat['id']: cat['nombre'] for cat in Categoria.get_all() }
-    return jsonify([{
-        "id": fila["id"], 
-        "nombre": fila["nombre"],
-        "fecha_creacion": fila["fecha_creacion"],
-        "fecha_limite": fila["fecha_limite"],
-        "prioridad": fila["prioridad"],
-        "estado": fila["estado"],
-        "tiempo_estimado": fila["tiempo_estimado"],
-        "completado_en": fila["completado_en"],
-        "categoria": categorias[fila["id_categoria"]],
-        "fecha_actualizacion": fila["fecha_actualizacion"]
-    } for fila in registros])
+    registros = [dict(fila) for fila in registros] # Convertir a diccionario
+    for fila in registros:
+        fila['categoria'] = categorias[fila['id_categoria']]
+    return jsonify(registros)
 
 @app.route('/api/tarea/<int:id>', methods=["GET", "PUT", "PATCH", "DELETE"])
 def api_tareas_show(id):
@@ -208,6 +201,11 @@ def editar(id): # EDITA Y ACTUALIZA UNA TAREA EXISTENTE
     if not tarea:
         abort(404)
         return render_template("404.html"), 404
+    
+    # Si es una petición AJAX (JSON), manejar con API
+    if request.is_json:
+        return api_tareas_show(id)
+    
     if request.method == "POST":
         nombre = request.form.get("title", "").strip()
         categoria = request.form.get("categoria", "").strip()
