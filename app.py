@@ -10,15 +10,39 @@
 # En esta sección importamos dependencias, inicializamos la base
 # de datos y declaramos utilidades de apoyo.
 # Importamos las clases y funciones que necesitamos de Flask
-from flask import Flask, render_template, request, redirect, flash, abort, jsonify
+import os
+from functools import wraps
+from flask import Flask, render_template, request, redirect, flash, abort, jsonify, Response
 from database import init_db
 from models.categoria import Categoria
 from models.tarea import Tarea
+
 # Creamos una instancia de la aplicación Flask
-# __name__ es una variable especial de Python que contiene el nombre del módulo
 app = Flask(__name__)
-app.secret_key = "dev-secret"  # Necesario para usar mensajes flash
+app.secret_key = os.environ.get('SECRET_KEY', 'dev-secret')
+
+# Autenticación HTTP básica solo para producción
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        # Solo pedir autenticación en producción
+        if os.environ.get('ENVIRONMENT') == 'production':
+            auth = request.authorization
+            username = os.environ.get('USERNAME', 'admin')
+            password = os.environ.get('PASSWORD', 'admin123')
+            
+            if not auth or auth.username != username or auth.password != password:
+                return Response('Acceso denegado', 401, {'WWW-Authenticate': 'Basic realm="Login"'})
+        return f(*args, **kwargs)
+    return decorated
+
 init_db()
+
+# =============================================================================
+# AUTENTICACIÓN SIMPLE
+# =============================================================================
+# La autenticación HTTP básica se maneja automáticamente por el navegador
+# No necesitamos rutas de login/logout separadas
 
 # =============================================================================
 # ESQUEMATIZA TUS RUTAS CRUD - Crear, Leer, Actualizar, Eliminar
@@ -39,6 +63,7 @@ init_db()
 # API JSON - 'Endpoints' para Tarea (CRUD)
 # =============================================================================
 @app.route('/api/tareas', methods=["GET"])
+@requires_auth
 def api_tareas_index():
     """API que devuelve todas las tareas en formato JSON limpio"""
     registros = Tarea.get_all()
@@ -49,6 +74,7 @@ def api_tareas_index():
     return jsonify(registros)
 
 @app.route('/api/tarea/<int:id>', methods=["GET", "PUT", "PATCH", "DELETE"])
+@requires_auth
 def api_tareas_show(id):
     registro = Tarea.get_by_id(id)
     if not registro:
@@ -92,6 +118,7 @@ def api_tareas_show(id):
     return jsonify(dict(actualizado))
 
 @app.route('/api/tarea/<int:id>/toggle-estado', methods=["POST", "PATCH"])
+@requires_auth
 def api_tareas_toggle_estado(id):
     """Alterna el estado de la tarea (pendiente <-> completada) y devuelve el registro actualizado como JSON."""
     registro = Tarea.get_by_id(id)
@@ -104,6 +131,7 @@ def api_tareas_toggle_estado(id):
 
 
 @app.route('/api/tareas', methods=["POST"])
+@requires_auth
 def api_tareas_create():
     if not request.is_json:
         return jsonify({"error": "Content-Type debe ser application/json"}), 400
@@ -139,11 +167,13 @@ def api_tareas_create():
     return jsonify(dict(nueva)), 201
 
 @app.route("/")
+@requires_auth
 def index():
     registros = Tarea.get_all()
     return render_template("index.html", tareas=registros)
 
 @app.route("/crear", methods=["GET", "POST"])
+@requires_auth
 def nueva_tarea():
     if request.method == "POST": # Verificamos si la petición es POST (envío de formulario)
         nombre = request.form.get("title", "").strip()
@@ -179,6 +209,7 @@ def nueva_tarea():
         return render_template("formulario.html", categorias=categorias)
 
 @app.route('/tarea/<int:id>')
+@requires_auth
 def detalle(id): # CONSULTA EL DETALLE DE UNA TAREA ESPECÍFICA
     tarea = Tarea.get_by_id(id)
     if not tarea:
@@ -187,6 +218,7 @@ def detalle(id): # CONSULTA EL DETALLE DE UNA TAREA ESPECÍFICA
     return render_template("tarea.html", tarea=tarea, categoria=categoria)
 
 @app.route('/tarea/<int:id>/toggle-estado', methods=["POST"])
+@requires_auth
 def toggle_estado(id): # Alterna el estado de la tarea entre 'pendiente' y 'completada'
     tarea = Tarea.get_by_id(id)
     if not tarea:
@@ -196,6 +228,7 @@ def toggle_estado(id): # Alterna el estado de la tarea entre 'pendiente' y 'comp
     return redirect(f"/tarea/{id}")
 
 @app.route("/editar/<int:id>", methods=["GET", "POST"])
+@requires_auth
 def editar(id): # EDITA Y ACTUALIZA UNA TAREA EXISTENTE
     tarea = Tarea.get_by_id(id)
     if not tarea:
@@ -243,6 +276,7 @@ def editar(id): # EDITA Y ACTUALIZA UNA TAREA EXISTENTE
         return render_template("editar.html", tarea=tarea, categorias=categorias)
 
 @app.route("/eliminar/<int:id>")
+@requires_auth
 def eliminar(id): # ELIMINA UNA TAREA DESDE LA INTERFAZ
     tarea = Tarea.get_by_id(id)
     if tarea:
@@ -254,22 +288,14 @@ def page_not_found(error):
     return render_template("404.html"), 404
 
 @app.route('/acerca')
+@requires_auth
 def acerca_de():
     return render_template("acerca.html")
 
 @app.route('/filtrar/<filtro>')
+@requires_auth
 def tareas_filtradas(filtro):
     # Obtenemos todas las tareas desde la base de datos
     filas = Tarea.get_all()
     # Filtramos por nombre conteniendo el filtro (insensible a mayúsculas)
     return render_template("tareas.html", tarea=filas)
-
-# =============================================================================
-# CONFIGURACIÓN PARA DESPLIEGUE CON GUNICORN
-# =============================================================================
-# Esta variable es requerida por Gunicorn cuando despliega la aplicación
-application = app
-
-if __name__ == "__main__":
-    # Solo ejecutar en modo desarrollo
-    app.run(debug=True)
