@@ -50,7 +50,7 @@ function crearEvento(tarea) {
         const fechaLimite = new Date(fecha);
         const hoy = new Date();
         if (fechaLimite > hoy) {
-            console.log(`DEBUG: Fecha límite ${fecha} está en el futuro, usando fecha de creación`);
+            // console.log(`DEBUG: Fecha límite ${fecha} está en el futuro, usando fecha de creación`);
             fecha = tarea.fecha_creacion;
         }
     } else {
@@ -68,12 +68,12 @@ function crearEvento(tarea) {
     if (tarea.estado === "completada") {
         color = "#6c757d";
     }
-    
-    console.log(`DEBUG: Creando evento para tarea ${tarea.id}:`, {
+    /* console.log(`DEBUG: Creando evento para tarea ${tarea.id}:`, {
         nombre: tarea.nombre,
         fecha: fecha,
         estado: tarea.estado
     });
+    */
     
     return {
         id: tarea.id,
@@ -112,12 +112,12 @@ if (el) {
  */
 async function cargarTareas() {
     try {
-        console.log('DEBUG: Cargando tareas desde /api/tareas');
+        // console.log('DEBUG: Cargando tareas desde /api/tareas');
         const response = await apiFetch('/api/tareas');
-        console.log('DEBUG: Respuesta de API:', response);
+        // console.log('DEBUG: Respuesta de API:', response);
         
         const eventos = response.map(tarea => crearEvento(tarea));
-        console.log('DEBUG: Eventos creados:', eventos);
+        // console.log('DEBUG: Eventos creados:', eventos);
         
         return eventos;
     } catch (error) {
@@ -158,9 +158,9 @@ function inicializarCalendario() {
         // Cargar eventos
         events: async function(info, successCallback, failureCallback) {
             try {
-                console.log('DEBUG: FullCalendar solicitando eventos para rango:', info.start, 'a', info.end);
+                // console.log('DEBUG: FullCalendar solicitando eventos para rango:', info.start, 'a', info.end);
                 const eventos = await cargarTareas();
-                console.log('DEBUG: Enviando eventos a FullCalendar:', eventos);
+                // console.log('DEBUG: Enviando eventos a FullCalendar:', eventos);
                 successCallback(eventos);
             } catch (error) {
                 console.error('Error al cargar eventos:', error);

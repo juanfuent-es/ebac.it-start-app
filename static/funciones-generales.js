@@ -29,14 +29,14 @@ async function apiFetch(url, options = {}) {
         headers['Content-Type'] = 'application/json';
     }
     
-    console.log(`DEBUG: Realizando petición ${options.method || 'GET'} a ${url}`);
+    //console.log(`DEBUG: Realizando petición ${options.method || 'GET'} a ${url}`);
     
     try {
         const response = await fetch(url, { ...options, headers });
         
         // Si es respuesta 204 (No Content), no hay JSON
         if (response.status === 204) {
-            console.log('DEBUG: Respuesta 204 - Sin contenido');
+            //console.log('DEBUG: Respuesta 204 - Sin contenido');
             return null;
         }
         
@@ -44,7 +44,7 @@ async function apiFetch(url, options = {}) {
         try {
             data = await response.json();
         } catch (e) {
-            console.error("ERROR: No se pudo parsear el JSON de la respuesta", e);
+            //console.error("ERROR: No se pudo parsear el JSON de la respuesta", e);
             // Continuar sin datos si no hay JSON válido
         }
         
@@ -54,15 +54,15 @@ async function apiFetch(url, options = {}) {
             const error = new Error(message);
             error.status = response.status;
             error.data = data;
-            console.error('ERROR: Petición fallida:', error);
+            //console.error('ERROR: Petición fallida:', error);
             throw error;
         }
         
-        console.log('DEBUG: Petición exitosa:', data);
+        //console.log('DEBUG: Petición exitosa:', data);
         return data;
         
     } catch (error) {
-        console.error('ERROR: Fallo en petición API:', error);
+        //console.error('ERROR: Fallo en petición API:', error);
         throw error;
     }
 }
@@ -80,7 +80,7 @@ async function apiFetch(url, options = {}) {
 function showFlash(message, category = 'info', duration = 3500) {
     const container = document.querySelector('main.container');
     if (!container) {
-        console.warn('WARNING: No se encontró el contenedor main.container para mostrar flash');
+        //console.warn('WARNING: No se encontró el contenedor main.container para mostrar flash');
         return;
     }
     
@@ -110,7 +110,7 @@ function showFlash(message, category = 'info', duration = 3500) {
         }, duration);
     }
     
-    console.log(`DEBUG: Flash message mostrado - ${category}: ${message}`);
+    //console.log(`DEBUG: Flash message mostrado - ${category}: ${message}`);
 }
 
 /**
@@ -332,7 +332,7 @@ function onClickOutside(element, callback) {
  * Inicializa funciones generales cuando el DOM esté listo
  */
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DEBUG: Funciones generales inicializadas');
+    //console.log('DEBUG: Funciones generales inicializadas');
     
     // Configurar tooltips de Bootstrap si están disponibles
     if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {

@@ -1,22 +1,292 @@
 <!-- =============================================================================
-     TEMPLATE: PÁGINA "ACERCA DE"
+     TEMPLATE: PÁGINA "ACERCA DE" - IT START PROJECT
      =============================================================================
-     Esta página muestra información sobre la aplicación
+     Esta página muestra información detallada sobre el proyecto IT Start
+     y su conexión con EBAC (Escuela Brasileña de Arte y Ciencia)
      
      CONCEPTOS CLAVE:
-     - Página informativa: Explica qué hace la aplicación
-     - Contenido estático: No cambia dinámicamente
+     - Página informativa completa: Explica el proyecto educativo
+     - Contenido estático con diseño responsivo
      - Herencia de template: Usa la estructura base de layout.html
+     - Integración con Bootstrap para diseño moderno
      ============================================================================= -->
 <!-- Heredamos la estructura del template layout.html -->
 {% extends "layout.html" %}
 <!-- Definimos el título de esta página -->
-{% block title %}Acerca de{% endblock %}
+{% block title %}Acerca de IT Start{% endblock %}
 <!-- Definimos el contenido específico de esta página -->
 {% block content %}
-<!-- Título de la página -->
-<h1>Acerca de</h1>
-<!-- Descripción de la aplicación -->
-<!-- Esta información ayuda a los usuarios a entender qué hace la aplicación -->
-<p>Rutina.py es una aplicación web que te ayuda a crear y gestionar tus rutinas de entrenamiento.</p>
+<div class="container-fluid">
+    <!-- Hero Section -->
+    <div class="row bg-primary text-white py-5 mb-4">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold mb-3">IT Start</h1>
+            <p class="lead fs-4">El curso para aprender programación desde 0</p>
+            <p class="fs-5">Desarrollado en colaboración con <a href="https://ebac.mx/" target="_blank" class="text-warning fw-bold">EBAC México</a></p>
+        </div>
+    </div>
+
+    <!-- Descripción del Proyecto -->
+    <div class="row mb-5">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <h2 class="card-title text-center mb-4 text-primary">¿Qué es IT Start?</h2>
+                    <p class="card-text fs-5 text-muted mb-4">
+                        IT Start es un proyecto educativo integral diseñado para introducir a los estudiantes 
+                        en el fascinante mundo de la programación y la tecnología. Nuestro enfoque se centra 
+                        en el <strong>pensamiento computacional</strong> como base fundamental para desarrollar 
+                        habilidades de resolución de problemas que son aplicables en cualquier área profesional.
+                    </p>
+                    <p class="card-text fs-5 text-muted">
+                        A través de una metodología práctica y progresiva, los estudiantes aprenden desde 
+                        los conceptos más básicos hasta especializaciones avanzadas en diferentes perfiles 
+                        tecnológicos, preparándolos para las demandas del mercado laboral actual.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pilares del Curso -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-5 text-primary">Pilares Fundamentales del Curso</h2>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="fas fa-brain fa-lg"></i>
+                    </div>
+                    <h5 class="card-title text-primary">Pensamiento Computacional</h5>
+                    <p class="card-text text-muted">
+                        Desarrolla la capacidad de descomponer problemas complejos en partes más pequeñas 
+                        y manejables, una habilidad esencial en programación.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="fas fa-code fa-lg"></i>
+                    </div>
+                    <h5 class="card-title text-success">Fundamentos de Programación</h5>
+                    <p class="card-text text-muted">
+                        Aprende los conceptos básicos de programación: variables, estructuras de control, 
+                        funciones y algoritmos desde cero.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="fas fa-laptop-code fa-lg"></i>
+                    </div>
+                    <h5 class="card-title text-info">Desarrollo Web</h5>
+                    <p class="card-text text-muted">
+                        Explora el desarrollo frontend, backend y fullstack con tecnologías modernas 
+                        y mejores prácticas de la industria.
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center p-4">
+                    <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <i class="fas fa-chart-line fa-lg"></i>
+                    </div>
+                    <h5 class="card-title text-warning">Ciencia de Datos</h5>
+                    <p class="card-text text-muted">
+                        Descubre cómo extraer insights valiosos de los datos utilizando Python, 
+                        estadística y machine learning.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Perfiles Profesionales -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-5 text-primary">Perfiles Profesionales</h2>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-paint-brush me-2"></i>Frontend Developer</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Especialízate en la creación de interfaces de usuario atractivas y funcionales. 
+                        Aprende HTML, CSS, JavaScript y frameworks modernos como React o Vue.js.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Diseño responsivo</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Experiencia de usuario (UX/UI)</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Frameworks JavaScript</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-server me-2"></i>Backend Developer</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Desarrolla la lógica del servidor y las APIs que alimentan las aplicaciones. 
+                        Domina Python, bases de datos y arquitecturas escalables.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>APIs RESTful</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Bases de datos</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Seguridad web</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>Full Stack Developer</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Combina habilidades frontend y backend para crear aplicaciones completas. 
+                        Ideal para emprendedores y desarrolladores versátiles.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Desarrollo completo</li>
+                        <li><i class="fas fa-check text-success me-2"></i>DevOps básico</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Arquitectura de software</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-warning text-white">
+                    <h5 class="mb-0"><i class="fas fa-database me-2"></i>Data Scientist</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Extrae valor de los datos para tomar decisiones informadas. Aprende análisis 
+                        estadístico, machine learning y visualización de datos.
+                    </p>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-check text-success me-2"></i>Análisis estadístico</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Machine Learning</li>
+                        <li><i class="fas fa-check text-success me-2"></i>Visualización de datos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Colaboración con EBAC -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="card bg-light border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8">
+                            <h3 class="text-primary mb-3">Colaboración con EBAC México</h3>
+                            <p class="fs-5 text-muted mb-4">
+                                Este proyecto forma parte del ecosistema educativo de 
+                                <a href="https://ebac.mx/" target="_blank" class="text-primary fw-bold">EBAC México</a>, 
+                                una escuela online que te enseña a conquistar las profesiones más demandadas 
+                                en el mercado laboral.
+                            </p>
+                            <p class="fs-5 text-muted">
+                                EBAC cuenta con más de <strong>145,000 alumnos</strong> y un 
+                                <strong>78% de nuestros estudiantes</strong> encuentran trabajos relevantes 
+                                al finalizar nuestros cursos, gracias a la colaboración con más de 
+                                <strong>40 empresas</strong> que nos ayudan a desarrollar programas 
+                                basados en las necesidades reales del mercado.
+                            </p>
+                        </div>
+                        <div class="col-lg-4 text-center">
+                            <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 120px; height: 120px;">
+                                <i class="fas fa-graduation-cap fa-3x"></i>
+                            </div>
+                            <a href="https://ebac.mx/" target="_blank" class="btn btn-primary btn-lg">
+                                <i class="fas fa-external-link-alt me-2"></i>Visitar EBAC
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Metodología -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="text-center mb-5 text-primary">Nuestra Metodología</h2>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="text-center">
+                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                    <span class="fs-2 fw-bold">1</span>
+                </div>
+                <h5 class="text-primary">Aprende</h5>
+                <p class="text-muted">
+                    Conceptos teóricos fundamentales con ejemplos prácticos y casos de uso reales.
+                </p>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="text-center">
+                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                    <span class="fs-2 fw-bold">2</span>
+                </div>
+                <h5 class="text-success">Practica</h5>
+                <p class="text-muted">
+                    Ejercicios progresivos y proyectos que simulan situaciones laborales reales.
+                </p>
+            </div>
+        </div>
+        <div class="col-lg-4 mb-4">
+            <div class="text-center">
+                <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                    <span class="fs-2 fw-bold">3</span>
+                </div>
+                <h5 class="text-info">Aplica</h5>
+                <p class="text-muted">
+                    Proyectos finales que demuestran tus habilidades y enriquecen tu portafolio.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-primary text-white text-center border-0 shadow-lg">
+                <div class="card-body p-5">
+                    <h3 class="card-title mb-3">¿Listo para comenzar tu carrera en tecnología?</h3>
+                    <p class="card-text fs-5 mb-4">
+                        Únete a miles de estudiantes que ya están transformando sus vidas con IT Start
+                    </p>
+                    <a href="/" class="btn btn-warning btn-lg me-3">
+                        <i class="fas fa-home me-2"></i>Explorar Aplicación
+                    </a>
+                    <a href="https://ebac.mx/" target="_blank" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-graduation-cap me-2"></i>Conoce EBAC
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Font Awesome para iconos -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 {% endblock %}

@@ -14,7 +14,7 @@ def connect_db():
     conn = sqlite3.connect(DATABASE_NAME) # Conecta a la base de datos
     conn.row_factory = sqlite3.Row  # Devuelve filas tipo Row: acceso por índice y por llave
     conn.execute("PRAGMA foreign_keys = ON") # Activa el modo de clave foránea
-    print(f" * Conectado a: {DATABASE_NAME}")
+    # print(f" * Conectado a: {DATABASE_NAME}")
     return conn
 
 # Función para inicializar la base 
@@ -25,7 +25,7 @@ def init_db():
     creando tablas, índices, etc.
     """
     conn = connect_db()
-    print(" * Inicializando base de datos")
+    # print(" * Inicializando base de datos")
     create_table_categorias(conn)
     create_table_tareas(conn)
     create_indices(conn)
@@ -46,7 +46,7 @@ def create_table_categorias(conn):
         )
     """)
     conn.commit()
-    print(" * Tabla categorias creada")
+    # print(" * Tabla categorias creada")
 
 def create_table_tareas(conn):
     """
@@ -84,7 +84,7 @@ def create_table_tareas(conn):
         );
     """)
     conn.commit()
-    print(" * Tabla tareas creada")
+    # print(" * Tabla tareas creada")
 
 def create_indices(conn):
     """
@@ -96,7 +96,7 @@ def create_indices(conn):
         ON tareas(id_categoria, estado);
     """)
     conn.commit()
-    print(" * Índice idx_tareas_categoria_estado creado")
+    # print(" * Índice idx_tareas_categoria_estado creado")
 
 # -----------------------------------------------------------------------------
 # Helpers simples: ejecutar consultas sin repetir conexión
